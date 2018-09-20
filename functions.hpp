@@ -5,5 +5,5 @@
 void getHistogram(cv::Mat &image, std::vector<int> & histogram);
 void getCumulativeHistogram(std::vector<int> & original, std::vector<int> & cumulative);
 void normalize(std::vector<int> cumulative, std::vector<int> & normalizado);
-void equalization();
+void equalization(cv::Mat image, std::vector<int> & normalizado);
 #endif

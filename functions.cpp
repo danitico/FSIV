@@ -1,4 +1,5 @@
 #include "functions.hpp"
+#include <opencv2/highgui.hpp>
 #include <iostream>
 void getHistogram(cv::Mat &image, std::vector<int> & histogram){
    for(int i=0; i<image.rows; i++){
@@ -26,7 +27,13 @@ void normalize(std::vector<int> cumulative, std::vector<int> & normalizado){
          // std::cout << 255*a << '\n';
          normalizado[i]=255*a;
       }
-      // for(int i=0; i<normalizado.size(); i++){
-      //    std::cout << "c[" << i << "]" << normalizado[i] << '\n';
-      // }
+}
+void equalization(cv::Mat image, std::vector<int> & normalizado){
+   for(int i=0; i<image.rows; i++){
+      uchar *ptr=image.ptr<uchar>(i);
+      for(int j=0; j<image.cols; j++){
+         ptr[j]=normalizado[ptr[j]];
+      }
+   }
+   cv::imwrite("pipo.png", image);
 }

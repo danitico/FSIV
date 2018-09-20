@@ -18,20 +18,21 @@ int main(int argc, char **argv){
    std::vector<int> cumulative(256, 0);
    getHistogram(image, histogram);
 
-   for(int i=0; i<histogram.size(); i++){
-      std::cout << "v[" << i << "]" << histogram[i] << '\n';
-   }
+   // for(int i=0; i<histogram.size(); i++){
+   //    std::cout << "v[" << i << "]" << histogram[i] << '\n';
+   // }
    // Do equalization
 
    getCumulativeHistogram(histogram, cumulative);
-   for(int i=0; i<cumulative.size(); i++){
-      std::cout << "c[" << i << "]" << cumulative[i] << '\n';
-   }
+   // for(int i=0; i<cumulative.size(); i++){
+   //    std::cout << "c[" << i << "]" << cumulative[i] << '\n';
+   // }
 
    std::vector<int> normalizado(256, 0);
    normalize(cumulative, normalizado);
+   equalization(image, normalizado);
 
-   for(int i=0; i<normalizado.size(); i++){
-      std::cout << "c[" << i << "]" << normalizado[i] << '\n';
-   }
+   // for(int i=0; i<normalizado.size(); i++){
+   //    std::cout << "c[" << i << "]" << normalizado[i] << '\n';
+   // }
 }
