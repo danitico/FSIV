@@ -26,7 +26,7 @@ void normalize(std::vector<int> cumulative, std::vector<int> & normalizado){
          normalizado[i]=255*a;
       }
 }
-void equalization(cv::Mat image, std::vector<int> & normalizado, std::string & newImage){
+void equalization(cv::Mat image, std::vector<int> & normalizado, std::string newImage){
    for(int i=0; i<image.rows; i++){
       uchar *ptr=image.ptr<uchar>(i);
       for(int j=0; j<image.cols; j++){
@@ -35,7 +35,19 @@ void equalization(cv::Mat image, std::vector<int> & normalizado, std::string & n
    }
    cv::imwrite(newImage, image);
 }
-void equalizationImage(cv::Mat & image, std::string & newImage){
+void equalizationMask(cv::Mat image, cv::Mat mask, std::vector<int> & normalizado, std::string newImage){
+   for(int i=0; i<image.rows; i++){
+      uchar *ptr=image.ptr<uchar>(i);
+      uchar *ptr2=mask.ptr<uchar>(i);
+      for(int j=0; j<image.cols; j++){
+         if(ptr2[j]>0){
+            ptr[j]=normalizado[ptr[j]];
+         }
+      }
+   }
+   cv::imwrite(newImage, image);
+}
+void equalizationImage(cv::Mat & image, std::string newImage){
    std::vector<int> histogram(256, 0);
    std::vector<int> cumulative(256, 0);
    std::vector<int> normalizado(256, 0);
@@ -44,4 +56,76 @@ void equalizationImage(cv::Mat & image, std::string & newImage){
    getCumulativeHistogram(histogram, cumulative);
    normalize(cumulative, normalizado);
    equalization(image, normalizado, newImage);
+}
+void equalizationImageWithMask(cv::Mat & image, cv::Mat & mask, std::string newImage){
+   std::vector<int> histogram(256, 0);
+   std::vector<int> cumulative(256, 0);
+   std::vector<int> normalizado(256, 0);
+
+   getHistogram(image, histogram);
+   getCumulativeHistogram(histogram, cumulative);
+   normalize(cumulative, normalizado);
+   equalizationMask(image, mask, normalizado, newImage);
+}
+void equalizationImageSlides(cv::Mat & image, std::string newImage, int r){
+   cv::Mat image2(image.rows, image.cols, image.type());
+   std::vector<int> histogram;
+   std::vector<int> cumulative;
+   std::vector<int> normalizado;
+   r=2*r + 1;
+
+   for(int i=0; i<image2.rows; i++){
+      uchar *ptr=image.ptr<uchar>(i);
+      uchar *ptr2=image2.ptr<uchar>(i);
+      for(int j=0; j<image2.cols; j++){
+         histogram.resize(256, 0);
+         cumulative.resize(256, 0);
+         normalizado.resize(256, 0);
+
+         getHistogramSlides(image, histogram, i, j, r);
+         getCumulativeHistogram(histogram, cumulative);
+         normalize(cumulative, normalizado);
+         ptr2[j]=normalizado[ptr[j]];
+         // std::cout << ptr[j] << '\n';
+      }
+   }
+   cv::imwrite(newImage, image2);
+}
+void getHistogramSlides(cv::Mat & image, std::vector<int> & histogram, int i, int j, int r){
+   uchar *ptr=image.ptr<uchar>(j);
+   int i_arriba=i-1;
+   int contador=0;
+
+   while(i_arriba >= 0 && contador < r){
+      histogram[ptr[i_arriba]]++;
+      i_arriba--;
+      contador++;
+   }
+
+   ptr=image.ptr<uchar>(j);
+   int i_abajo=i+1;
+   contador=0;
+   while(i_abajo < image.rows && contador < r){
+      histogram[ptr[i_abajo]]++;
+      i_abajo++;
+      contador++;
+   }
+
+   ptr=image.ptr<uchar>(i);
+   int j_izquierda=j-1;
+   contador=0;
+   while(j_izquierda >= 0 && contador < r){
+      histogram[ptr[j_izquierda]]++;
+      j_izquierda--;
+      contador++;
+   }
+
+   ptr=image.ptr<uchar>(i);
+   int j_derecha=j+1;
+   contador=0;
+   while(j_derecha < image.cols && contador < r){
+      histogram[ptr[j_derecha]]++;
+      j_derecha++;
+      contador++;
+   }
 }

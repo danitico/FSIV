@@ -13,25 +13,28 @@ int main(int argc, char **argv){
       std::cout << "Error reading image" << '\n';
    }
 
-   std::string newImage;
-   std::cout << "Type the name of the equalized image: ";
-   std::cin >> newImage;
+   // cv::Mat mask=cv::imread(argv[3], cv::IMREAD_GRAYSCALE);
+   // if(mask.rows==0){
+   //    std::cout << "Error reading image" << '\n';
+   // }
 
-   cv::Mat b;
-   cv::Mat negro;
-   equalizationImage(image, newImage);
-   cv::equalizeHist(image, b);
+//---------------------------------------------------------------
+   // equalizationImage(image, argv[2]);
+
+//---------------------------------------------------------------
+   // equalizationImageWithMask(image, mask, argv[2]);
+//---------------------------------------------------------------
+   equalizationImageSlides(image, argv[2], 5);
+
+   cv::Mat after=cv::imread(argv[2]);
+   cv::namedWindow(argv[2]);
+   cv::imshow(argv[2], after);
 
 
-   cv::Mat after=cv::imread(newImage);
+   // cv::namedWindow(argv[1]);
+   // cv::imshow(argv[1], image);
+   // cv::namedWindow("opencv");
+   // cv::imshow("opencv", b);
 
-   cv::namedWindow(argv[1]);
-   cv::imshow(argv[1], image);
-   cv::namedWindow(newImage);
-   cv::imshow(newImage, after);
-   cv::namedWindow("opencv");
-   cv::imshow("opencv", b);
-
-   cv::waitKey(0);
-
+   // cv::waitKey(0);
 }
