@@ -23,17 +23,25 @@ void normalize(std::vector<int> cumulative, std::vector<int> & normalizado){
       float a=0.0;
       for(int i=0; i<normalizado.size(); i++){
          a=(float)(cumulative[i]-cumulative[0])/(float)(cumulative[255]-cumulative[0]);
-         // std::cout << a << '\n';
-         // std::cout << 255*a << '\n';
          normalizado[i]=255*a;
       }
 }
-void equalization(cv::Mat image, std::vector<int> & normalizado){
+void equalization(cv::Mat image, std::vector<int> & normalizado, std::string & newImage){
    for(int i=0; i<image.rows; i++){
       uchar *ptr=image.ptr<uchar>(i);
       for(int j=0; j<image.cols; j++){
          ptr[j]=normalizado[ptr[j]];
       }
    }
-   cv::imwrite("pipo.png", image);
+   cv::imwrite(newImage, image);
+}
+void equalizationImage(cv::Mat & image, std::string & newImage){
+   std::vector<int> histogram(256, 0);
+   std::vector<int> cumulative(256, 0);
+   std::vector<int> normalizado(256, 0);
+
+   getHistogram(image, histogram);
+   getCumulativeHistogram(histogram, cumulative);
+   normalize(cumulative, normalizado);
+   equalization(image, normalizado, newImage);
 }

@@ -3,7 +3,6 @@
 #include <iostream>
 #include <cstdlib>
 #include "functions.hpp"
-using namespace std;
 int main(int argc, char **argv){
    // if(argc!=2){
    //    std::cout << "Error al llamar al programa" << '\n';
@@ -14,25 +13,25 @@ int main(int argc, char **argv){
       std::cout << "Error reading image" << '\n';
    }
 
-   std::vector<int> histogram(256, 0);
-   std::vector<int> cumulative(256, 0);
-   getHistogram(image, histogram);
+   std::string newImage;
+   std::cout << "Type the name of the equalized image: ";
+   std::cin >> newImage;
 
-   // for(int i=0; i<histogram.size(); i++){
-   //    std::cout << "v[" << i << "]" << histogram[i] << '\n';
-   // }
-   // Do equalization
+   cv::Mat b;
+   cv::Mat negro;
+   equalizationImage(image, newImage);
+   cv::equalizeHist(image, b);
 
-   getCumulativeHistogram(histogram, cumulative);
-   // for(int i=0; i<cumulative.size(); i++){
-   //    std::cout << "c[" << i << "]" << cumulative[i] << '\n';
-   // }
 
-   std::vector<int> normalizado(256, 0);
-   normalize(cumulative, normalizado);
-   equalization(image, normalizado);
+   cv::Mat after=cv::imread(newImage);
 
-   // for(int i=0; i<normalizado.size(); i++){
-   //    std::cout << "c[" << i << "]" << normalizado[i] << '\n';
-   // }
+   cv::namedWindow(argv[1]);
+   cv::imshow(argv[1], image);
+   cv::namedWindow(newImage);
+   cv::imshow(newImage, after);
+   cv::namedWindow("opencv");
+   cv::imshow("opencv", b);
+
+   cv::waitKey(0);
+
 }
