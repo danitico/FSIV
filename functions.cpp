@@ -91,41 +91,72 @@ void equalizationImageSlides(cv::Mat & image, std::string newImage, int r){
    }
    cv::imwrite(newImage, image2);
 }
-void getHistogramSlides(cv::Mat & image, std::vector<int> & histogram, int i, int j, int r){
-   uchar *ptr=image.ptr<uchar>(j);
+void getHistogramSlides(cv::Mat image, std::vector<int> & histogram, int i, int j, int r){
+   uchar *puntero=image.ptr<uchar>(i);
+   histogram[puntero[j]]++;
+
    int i_arriba=i-1;
-   int contador=0;
-
-   while(i_arriba >= 0 && contador < r){
-      histogram[ptr[i_arriba]]++;
-      i_arriba--;
-      contador++;
-   }
-
-   ptr=image.ptr<uchar>(j);
-   int i_abajo=i+1;
-   contador=0;
-   while(i_abajo < image.rows && contador < r){
-      histogram[ptr[i_abajo]]++;
-      i_abajo++;
-      contador++;
-   }
-
-   ptr=image.ptr<uchar>(i);
    int j_izquierda=j-1;
-   contador=0;
-   while(j_izquierda >= 0 && contador < r){
-      histogram[ptr[j_izquierda]]++;
-      j_izquierda--;
-      contador++;
+   int j_derecha=j+1;
+   int i_abajo=i+1;
+   int contador1=0;
+   int contador2=0;
+   int contador3=0;
+   int contador4=0;
+   uchar *ptr1=image.ptr<uchar>(j);
+   uchar *ptr2=image.ptr<uchar>(i_arriba);
+
+   while(i_arriba >= 0 && contador1 < r){
+      ptr2=image.ptr<uchar>(i_arriba);
+      while(j_izquierda >= 0 && contador2 < r){
+         histogram[ptr2[j_izquierda]]++;
+         j_izquierda--;
+         contador2++;
+      }
+      while(j_derecha < image.cols - 1 && contador3 < r){
+         histogram[ptr2[j_derecha]]++;
+         j_derecha++;
+         contador3++;
+      }
+      histogram[ptr1[i_arriba]]++;
+      i_arriba--;
+      contador1++;
    }
 
-   ptr=image.ptr<uchar>(i);
-   int j_derecha=j+1;
-   contador=0;
-   while(j_derecha < image.cols && contador < r){
-      histogram[ptr[j_derecha]]++;
-      j_derecha++;
-      contador++;
+   contador2=contador3=0;
+   while(i_abajo < image.rows - 1 && contador4 < r){
+      ptr2=image.ptr<uchar>(i_abajo);
+      while(j_izquierda >= 0 && contador2 < r){
+         histogram[ptr2[j_izquierda]]++;
+         j_izquierda--;
+         contador2++;
+      }
+      while(j_derecha < image.cols - 1 && contador3 < r){
+         histogram[ptr2[j_derecha]]++;
+         j_derecha++;
+         contador3++;
+      }
+      // std::cout << i_abajo << '\n';
+      histogram[ptr1[i_abajo]]++;
+      i_abajo++;
+      contador4++;
    }
+   //
+   // ptr=image.ptr<uchar>(i);
+   // int j_izquierda=j-1;
+   // contador=0;
+   // while(j_izquierda >= 0 && contador < r){
+   //    histogram[ptr[j_izquierda]]++;
+   //    j_izquierda--;
+   //    contador++;
+   // }
+   //
+   // ptr=image.ptr<uchar>(i);
+   // int j_derecha=j+1;
+   // contador=0;
+   // while(j_derecha < image.cols && contador < r){
+   //    histogram[ptr[j_derecha]]++;
+   //    j_derecha++;
+   //    contador++;
+   // }
 }

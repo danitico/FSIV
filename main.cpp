@@ -24,7 +24,7 @@ int main(int argc, char **argv){
 //---------------------------------------------------------------
    // equalizationImageWithMask(image, mask, argv[2]);
 //---------------------------------------------------------------
-   equalizationImageSlides(image, argv[2], 5);
+   equalizationImageSlides(image, argv[2], 25);
 
    cv::Mat after=cv::imread(argv[2]);
    cv::namedWindow(argv[2]);
