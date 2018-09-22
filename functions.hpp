@@ -12,4 +12,5 @@ void equalizationImage(cv::Mat & image, std::string newImage);
 void equalizationImageWithMask(cv::Mat & image, cv::Mat & mask, std::string newImage);
 // void equalizationImageSlides(cv::Mat & image, std::string newImage, int r);
 void intento1(cv::Mat & image, std::string newImage, int r);
+void RGB(cv::Mat image, std::string newImage);
 #endif

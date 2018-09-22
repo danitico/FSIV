@@ -1,5 +1,6 @@
 #include "functions.hpp"
 #include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 #include <iostream>
 void getHistogram(cv::Mat &image, std::vector<int> & histogram){
    for(int i=0; i<image.rows; i++){
@@ -173,4 +174,29 @@ void intento1(cv::Mat & image, std::string newImage, int r){
       }
    }
    cv::imwrite(newImage, image2);
+}
+void RGB(cv::Mat image, std::string newImage){
+   cv::Mat HSV[3];
+   std::vector<int> histogram(256, 0);
+   std::vector<int> cumulative(256, 0);
+   std::vector<int> normalizado(256, 0);
+
+   cv::cvtColor(image, image, cv::COLOR_RGB2HSV);
+   split(image, HSV);
+
+   getHistogram(HSV[2], histogram);
+   getCumulativeHistogram(histogram, cumulative);
+   normalize(cumulative, normalizado);
+
+   for(int i=0; i<HSV[2].rows; i++){
+      uchar *ptr=HSV[2].ptr<uchar>(i);
+      for(int j=0; j<HSV[2].cols; j++){
+         ptr[j]=normalizado[ptr[j]];
+      }
+   }
+
+   cv::Mat newHSV;
+   cv::merge(HSV, 3, newHSV);
+   cv::cvtColor(newHSV, newHSV, cv::COLOR_HSV2RGB);
+   cv::imwrite(newImage, newHSV);
 }

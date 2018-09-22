@@ -8,7 +8,7 @@ int main(int argc, char **argv){
    //    std::cout << "Error al llamar al programa" << '\n';
    // }
 
-   cv::Mat image=cv::imread(argv[1], cv::IMREAD_GRAYSCALE);
+   cv::Mat image=cv::imread(argv[1]/*, cv::IMREAD_GRAYSCALE*/);
    if(image.rows==0){
       std::cout << "Error reading image" << '\n';
    }
@@ -28,9 +28,10 @@ int main(int argc, char **argv){
 //---------------------------------------------------------------
    // intento1(image, argv[2], 25);
 //---------------------------------------------------------------
-   cv::Mat after=cv::imread(argv[2]);
-   cv::namedWindow(argv[2]);
-   cv::imshow(argv[2], after);
+   RGB(image, argv[2]);
+   // cv::Mat after=cv::imread(argv[2]);
+   // cv::namedWindow(argv[2]);
+   // cv::imshow(argv[2], after);
 
 
    // cv::namedWindow(argv[1]);
@@ -38,5 +39,4 @@ int main(int argc, char **argv){
    // cv::namedWindow("opencv");
    // cv::imshow("opencv", b);
 
-   cv::waitKey(0);
 }
