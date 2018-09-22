@@ -24,8 +24,10 @@ int main(int argc, char **argv){
 //---------------------------------------------------------------
    // equalizationImageWithMask(image, mask, argv[2]);
 //---------------------------------------------------------------
-   equalizationImageSlides(image, argv[2], 25);
-
+   // equalizationImageSlides(image, argv[2], 25);
+//---------------------------------------------------------------
+   // intento1(image, argv[2], 25);
+//---------------------------------------------------------------
    cv::Mat after=cv::imread(argv[2]);
    cv::namedWindow(argv[2]);
    cv::imshow(argv[2], after);
@@ -36,5 +38,5 @@ int main(int argc, char **argv){
    // cv::namedWindow("opencv");
    // cv::imshow("opencv", b);
 
-   // cv::waitKey(0);
+   cv::waitKey(0);
 }
