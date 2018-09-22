@@ -13,4 +13,7 @@ void equalizationImageWithMask(cv::Mat & image, cv::Mat & mask, std::string newI
 // void equalizationImageSlides(cv::Mat & image, std::string newImage, int r);
 void intento1(cv::Mat & image, std::string newImage, int r);
 void RGB(cv::Mat image, std::string newImage);
+void biequalization(cv::Mat image, std::vector<int> & normalizado, std::string newImage);
+void biequalizationImage(cv::Mat & image, std::string newImage);
+double calcularMediana(std::vector<int> a);
 #endif

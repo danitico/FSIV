@@ -1,6 +1,7 @@
 #include "functions.hpp"
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <algorithm>
 #include <iostream>
 void getHistogram(cv::Mat &image, std::vector<int> & histogram){
    for(int i=0; i<image.rows; i++){
@@ -199,4 +200,40 @@ void RGB(cv::Mat image, std::string newImage){
    cv::merge(HSV, 3, newHSV);
    cv::cvtColor(newHSV, newHSV, cv::COLOR_HSV2RGB);
    cv::imwrite(newImage, newHSV);
+}
+void biequalization(cv::Mat image, std::vector<int> & normalizado, std::string newImage){
+   std::vector<int> v=normalizado;
+   std::sort(v.begin(), v.end());
+   double b=calcularMediana(v);
+   for(int i=0; i<image.rows; i++){
+      uchar *ptr=image.ptr<uchar>(i);
+      for(int j=0; j<image.cols; j++){
+         if(ptr[j] < b){
+            ptr[j]=v[ptr[j]];
+         }
+      }
+   }
+
+   for(int i=0; i<image.rows; i++){
+      uchar *ptr=image.ptr<uchar>(i);
+      for(int j=0; j<image.cols; j++){
+         if(ptr[j] >= b){
+            ptr[j]=v[ptr[j]];
+         }
+      }
+   }
+   cv::imwrite(newImage, image);
+}
+void biequalizationImage(cv::Mat & image, std::string newImage){
+   std::vector<int> histogram(256, 0);
+   std::vector<int> cumulative(256, 0);
+   std::vector<int> normalizado(256, 0);
+
+   getHistogram(image, histogram);
+   getCumulativeHistogram(histogram, cumulative);
+   normalize(cumulative, normalizado);
+   biequalization(image, normalizado, newImage);
+}
+double calcularMediana(std::vector<int> a){
+   return (double)(a[(a.size()-1)/2] + a[a.size()/2])/2.0;
 }
