@@ -24,13 +24,13 @@ int main(int argc, char **argv){
 //---------------------------------------------------------------
    // equalizationImageWithMask(image, mask, argv[2]);
 //---------------------------------------------------------------
-   // equalizationImageSlides(image, argv[2], 25);
+   equalizationImageSlides(image, argv[2], 25);
 //---------------------------------------------------------------
    // intento1(image, argv[2], 25);
 //---------------------------------------------------------------
    // RGB(image, argv[2]);
 //---------------------------------------------------------------
-   biequalizationImage(image, "hola.png");
+   // biequalizationImage(image, "hola.png");
 //---------------------------------------------------------------
    // cv::Mat after=cv::imread(argv[2]);
    // cv::namedWindow(argv[2]);
