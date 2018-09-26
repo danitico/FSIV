@@ -178,39 +178,72 @@ void RGB(cv::Mat image, std::string newImage){
    cv::cvtColor(newHSV, newHSV, cv::COLOR_HSV2RGB);
    cv::imwrite(newImage, newHSV);
 }
-void biequalization(cv::Mat image, std::vector<int> & normalizado, std::string newImage){
-   std::vector<int> v=normalizado;
+// void biequalization(cv::Mat image, std::vector<int> & normalizado, std::string newImage){
+//    std::vector<int> v=normalizado;
+//    std::sort(v.begin(), v.end());
+//    double b=calcularMediana(v);
+//    for(int i=0; i<image.rows; i++){
+//       uchar *ptr=image.ptr<uchar>(i);
+//       for(int j=0; j<image.cols; j++){
+//          if(ptr[j] < b){
+//             ptr[j]=v[ptr[j]];
+//          }
+//       }
+//    }
+//
+//    for(int i=0; i<image.rows; i++){
+//       uchar *ptr=image.ptr<uchar>(i);
+//       for(int j=0; j<image.cols; j++){
+//          if(ptr[j] >= b){
+//             ptr[j]=v[ptr[j]];
+//          }
+//       }
+//    }
+//    cv::imwrite(newImage, image);
+// }
+void biequalizationImage(cv::Mat & image, std::string newImage){
+   std::vector<int> histogram(256, 0);
+
+   getHistogram(image, histogram);
+   std::vector<int> v=histogram;
    std::sort(v.begin(), v.end());
-   double b=calcularMediana(v);
-   for(int i=0; i<image.rows; i++){
-      uchar *ptr=image.ptr<uchar>(i);
-      for(int j=0; j<image.cols; j++){
-         if(ptr[j] < b){
-            ptr[j]=v[ptr[j]];
-         }
+   int b=calcularMediana(v);
+
+   std::vector<int> histogram1(b+1, 0);
+   std::vector<int> histogram2(256-b-1, 0);
+
+   for(int i=0; i<histogram.size(); i++){
+      if(i<=b){
+         histogram1[i]=histogram[i];
+      }
+      else{
+         histogram2[i]=histogram[i];
       }
    }
+
+   std::vector<int> cumulative1(histogram1.size(), 0);
+   std::vector<int> normalizado1(histogram1.size(), 0);
+   getCumulativeHistogram(histogram1, cumulative1);
+   normalize(cumulative1, normalizado1);
+
+   std::vector<int> cumulative2(histogram2.size(), 0);
+   std::vector<int> normalizado2(histogram2.size(), 0);
+   getCumulativeHistogram(histogram2, cumulative2);
+   normalize(cumulative2, normalizado2);
 
    for(int i=0; i<image.rows; i++){
       uchar *ptr=image.ptr<uchar>(i);
       for(int j=0; j<image.cols; j++){
-         if(ptr[j] >= b){
-            ptr[j]=v[ptr[j]];
+         if(ptr[j] <= b){
+            ptr[j]=normalizado1[ptr[j]];
+         }
+         else{
+            ptr[j]=normalizado2[ptr[j]];
          }
       }
    }
    cv::imwrite(newImage, image);
 }
-void biequalizationImage(cv::Mat & image, std::string newImage){
-   std::vector<int> histogram(256, 0);
-   std::vector<int> cumulative(256, 0);
-   std::vector<int> normalizado(256, 0);
-
-   getHistogram(image, histogram);
-   getCumulativeHistogram(histogram, cumulative);
-   normalize(cumulative, normalizado);
-   biequalization(image, normalizado, newImage);
-}
-double calcularMediana(std::vector<int> a){
+int calcularMediana(std::vector<int> a){
    return (double)(a[(a.size()-1)/2] + a[a.size()/2])/2.0;
 }
