@@ -21,12 +21,12 @@ void getCumulativeHistogram(std::vector<int> & original, std::vector<int> & cumu
       }
    }
 }
-void normalize(std::vector<int> cumulative, std::vector<int> & normalizado){
-      float a=0.0;
-      for(int i=0; i<normalizado.size(); i++){
-         a=(float)(cumulative[i]-cumulative[0])/(float)(cumulative[255]-cumulative[0]);
-         normalizado[i]=255*a;
-      }
+void normalize(std::vector<int> cumulative, std::vector<int> & normalizado, int nuevo_minimo, int nuevo_maximo){
+   float a=0.0;
+   for(int i=0; i<normalizado.size(); i++){
+      a=(float)(cumulative[i]-cumulative[0])/(float)(cumulative.back()-cumulative[0]);
+      normalizado[i]=((nuevo_maximo-nuevo_minimo)*a) + nuevo_minimo ;
+   }
 }
 void equalization(cv::Mat image, std::vector<int> & normalizado, std::string newImage){
    for(int i=0; i<image.rows; i++){
@@ -201,7 +201,7 @@ void RGB(cv::Mat image, std::string newImage){
 //    }
 //    cv::imwrite(newImage, image);
 // }
-void biequalizationImage(cv::Mat & image, std::string newImage){
+void biequalizationImage(cv::Mat image, std::string newImage){
    std::vector<int> histogram(256, 0);
 
    getHistogram(image, histogram);
@@ -209,15 +209,17 @@ void biequalizationImage(cv::Mat & image, std::string newImage){
    std::sort(v.begin(), v.end());
    int b=calcularMediana(v);
 
-   std::vector<int> histogram1(b+1, 0);
-   std::vector<int> histogram2(256-b-1, 0);
+   std::vector<int> histogram1;
+   histogram1.resize(0);
+   std::vector<int> histogram2;
+   histogram2.resize(0);
 
    for(int i=0; i<histogram.size(); i++){
       if(i<=b){
-         histogram1[i]=histogram[i];
+         histogram1.push_back(histogram[i]);
       }
       else{
-         histogram2[i]=histogram[i];
+         histogram2.push_back(histogram[i]);
       }
    }
 
@@ -237,8 +239,8 @@ void biequalizationImage(cv::Mat & image, std::string newImage){
          if(ptr[j] <= b){
             ptr[j]=normalizado1[ptr[j]];
          }
-         else{
-            ptr[j]=normalizado2[ptr[j]];
+         if(ptr[j] > b){
+            ptr[j]=normalizado2[ptr[j] - b + 1]; //aqui esta el error, alo mejor ptr[j] es 200 pero normalizado a lo mejor no tiene 200 :(
          }
       }
    }
