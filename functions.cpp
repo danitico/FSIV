@@ -204,6 +204,20 @@ void RGB(cv::Mat image, std::string newImage){
    cv::cvtColor(newHSV, newHSV, cv::COLOR_HSV2RGB);
    cv::imwrite(newImage, newHSV);
 }
+void biequalization(cv::Mat image, std::vector<int> & normalizado1, std::vector<int> & normalizado2, int b, std::string newImage){
+   for(int i=0; i<image.rows; i++){
+      uchar *ptr=image.ptr<uchar>(i);
+      for(int j=0; j<image.cols; j++){
+         if(ptr[j] <= b){
+            ptr[j]=normalizado1[ptr[j]];
+         }
+         if(ptr[j] > b){
+            ptr[j]=normalizado2[ptr[j] - b + 1]; //aqui esta el error, alo mejor ptr[j] es 200 pero normalizado a lo mejor no tiene 200 :(
+         }
+      }
+   }
+   cv::imwrite(newImage, image);
+}
 void biequalizationImage(cv::Mat image, std::string newImage){
    std::vector<int> histogram(256, 0);
 
@@ -236,18 +250,74 @@ void biequalizationImage(cv::Mat image, std::string newImage){
    getCumulativeHistogram(histogram2, cumulative2);
    normalize(cumulative2, normalizado2);
 
+   biequalization(image, normalizado1, normalizado2, b, newImage);
+}
+void biequalizationMask(cv::Mat image, cv::Mat mask, std::vector<int> & normalizado1, std::vector<int> & normalizado2, int b, std::string newImage){
    for(int i=0; i<image.rows; i++){
       uchar *ptr=image.ptr<uchar>(i);
+      uchar *ptr2=mask.ptr<uchar>(i);
       for(int j=0; j<image.cols; j++){
-         if(ptr[j] <= b){
+         if(ptr[j] <= b && ptr2[j]>0){
             ptr[j]=normalizado1[ptr[j]];
          }
-         if(ptr[j] > b){
+         if(ptr[j] > b && ptr2[j]>0){
             ptr[j]=normalizado2[ptr[j] - b + 1]; //aqui esta el error, alo mejor ptr[j] es 200 pero normalizado a lo mejor no tiene 200 :(
          }
       }
    }
    cv::imwrite(newImage, image);
+}
+void biequalizationImagewithMask(cv::Mat image, cv::Mat mask, std::string newImage){
+   std::vector<int> histogram(256, 0);
+
+   getHistogram(image, histogram);
+   std::vector<int> v=histogram;
+   std::sort(v.begin(), v.end());
+   int b=calcularMediana(v);
+
+   std::vector<int> histogram1;
+   histogram1.resize(0);
+   std::vector<int> histogram2;
+   histogram2.resize(0);
+
+   for(int i=0; i<histogram.size(); i++){
+      if(i<=b){
+         histogram1.push_back(histogram[i]);
+      }
+      else{
+         histogram2.push_back(histogram[i]);
+      }
+   }
+
+   std::vector<int> cumulative1(histogram1.size(), 0);
+   std::vector<int> normalizado1(histogram1.size(), 0);
+   getCumulativeHistogram(histogram1, cumulative1);
+   normalize(cumulative1, normalizado1);
+
+   std::vector<int> cumulative2(histogram2.size(), 0);
+   std::vector<int> normalizado2(histogram2.size(), 0);
+   getCumulativeHistogram(histogram2, cumulative2);
+   normalize(cumulative2, normalizado2);
+
+   biequalizationMask(image, mask, normalizado1, normalizado2, b, newImage);
+}
+void biequalizationImageSlides(cv::Mat image, int r){
+   std::vector<int> histogram;
+   std::vector<int> histogram1;
+   std::vector<int> histogram2;
+   std::vector<int> cumulative1;
+   std::vector<int> normalizado1;
+   std::vector<int> cumulative2;
+   std::vector<int> normalizado2;
+
+   for(int i=0; i<image.rows; i++){
+      uchar *ptr=image.ptr<uchar>(i)
+      for(int j=0; j<image.cols; j++){
+         histogram.resize(256, 0);
+         getHistogramSlides(cv::Mat image, std::vector<int> & histogram, int i, int j, int r);
+         //me quedo aquí :)
+      }
+   }
 }
 int calcularMediana(std::vector<int> a){
    return (double)(a[(a.size()-1)/2] + a[a.size()/2])/2.0;

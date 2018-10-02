@@ -80,9 +80,24 @@ int main(int argc, char* const* argv){
                      RGB(picture3, image2);
                   }
                   else{
-                     std::cout << "Opciones incompatibles" << '\n';
-                     parser.printMessage();
-                     return 0;
+                     if(r==0 && bipartition==true && mask=="" && hsv==false){
+                        biequalizationImage(picture1, image2);
+                     }
+                     else{
+                        if(r==0 && bipartition==true && mask!="" && hsv==false){
+                           cv::Mat picture2=cv::imread(mask, cv::IMREAD_GRAYSCALE);
+                           if(picture2.rows==0){
+                              std::cout << "Error reading image 3" << '\n';
+                              return 0;
+                           }
+                           biequalizationImagewithMask(picture1, picture2, image2);
+                        }
+                        else{
+                           std::cout << "Opciones incompatibles" << '\n';
+                           parser.printMessage();
+                           return 0;
+                        }
+                     }
                   }
                }
             }
