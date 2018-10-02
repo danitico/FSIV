@@ -129,10 +129,8 @@ void equalizationImageWithMask(cv::Mat & image, cv::Mat & mask, std::string newI
    equalizationMask(image, mask, normalizado, newImage);
 }
 void equalizationImageSlides(cv::Mat & image, std::string newImage, int r){
-   //hay que poner a.copyTo(b) b=a.clone()
-   // cv::Mat image2=image;//esto esta mal
    cv::Mat image2;
-   image2=image.clone();
+   image2=image.clone();//to copy the object, I must use this function.
    std::vector<int> histogram;
    std::vector<int> cumulative;
    std::vector<int> normalizado;
@@ -261,7 +259,7 @@ void biequalizationMask(cv::Mat image, cv::Mat mask, std::vector<int> & normaliz
             ptr[j]=normalizado1[ptr[j]];
          }
          if(ptr[j] > b && ptr2[j]>0){
-            ptr[j]=normalizado2[ptr[j] - b + 1]; //aqui esta el error, alo mejor ptr[j] es 200 pero normalizado a lo mejor no tiene 200 :(
+            ptr[j]=normalizado2[ptr[j] - b + 1];
          }
       }
    }
@@ -301,7 +299,7 @@ void biequalizationImagewithMask(cv::Mat image, cv::Mat mask, std::string newIma
 
    biequalizationMask(image, mask, normalizado1, normalizado2, b, newImage);
 }
-void biequalizationImageSlides(cv::Mat image, int r, std::string newImage){
+void biequalizationImageSlides(cv::Mat image, std::string newImage, int r){
    std::vector<int> histogram;
    std::vector<int> histogram1;
    std::vector<int> histogram2;
@@ -348,6 +346,61 @@ void biequalizationImageSlides(cv::Mat image, int r, std::string newImage){
          }
          if(ptr[j] > b){
             ptr[j]=normalizado2[ptr[j] - b + 1];
+         }
+      }
+   }
+   cv::imwrite(newImage, image);
+}
+void biequalizationImageSlidesAndMask(cv::Mat & image, cv::Mat & mask, std::string newImage, int r){
+   std::vector<int> histogram;
+   std::vector<int> histogram1;
+   std::vector<int> histogram2;
+   std::vector<int> cumulative1;
+   std::vector<int> normalizado1;
+   std::vector<int> cumulative2;
+   std::vector<int> normalizado2;
+   int b;
+
+   for(int i=0; i<image.rows; i++){
+      uchar *ptr=image.ptr<uchar>(i);
+      uchar *ptr2=mask.ptr<uchar>(i);
+      for(int j=0; j<image.cols; j++){
+         if(ptr2[j] > 0){
+            b=0;
+            histogram.resize(256, 0);
+            getHistogramSlides(image, histogram, i, j, r);
+            std::vector<int> v=histogram;
+            std::sort(v.begin(), v.end());
+            b=calcularMediana(v);
+
+            histogram1.resize(0);
+            histogram2.resize(0);
+
+            for(int i=0; i<histogram.size(); i++){
+               if(i<=b){
+                  histogram1.push_back(histogram[i]);
+               }
+               else{
+                  histogram2.push_back(histogram[i]);
+               }
+            }
+
+            cumulative1.resize(histogram1.size(), 0);
+            cumulative2.resize(histogram2.size(), 0);
+            normalizado1.resize(histogram1.size(), 0);
+            normalizado2.resize(histogram2.size(), 0);
+
+            getCumulativeHistogram(histogram1, cumulative1);
+            normalize(cumulative1, normalizado1);
+            getCumulativeHistogram(histogram2, cumulative2);
+            normalize(cumulative2, normalizado2);
+
+            if(ptr[j] <= b){
+               ptr[j]=normalizado1[ptr[j]];
+            }
+            if(ptr[j] > b){
+               ptr[j]=normalizado2[ptr[j] - b + 1];
+            }
          }
       }
    }

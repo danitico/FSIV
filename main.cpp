@@ -32,6 +32,7 @@ int main(int argc, char* const* argv){
 
       if(!parser.check()){
          parser.printErrors();
+         parser.printMessage();
          return 0;
       }
 
@@ -42,7 +43,6 @@ int main(int argc, char* const* argv){
       }
 
       if(r==0 && bipartition==false && mask=="" && hsv==false){
-         std::cout << "meow" << '\n';
          equalizationImage(picture1, image2);
       }
       else{
@@ -52,12 +52,10 @@ int main(int argc, char* const* argv){
                std::cout << "Error reading image 2" << '\n';
                return 0;
             }
-            std::cout << "meow1" << '\n';
             equalizationImageWithMask(picture1, picture2, image2);
          }
          else{
             if(r>0 && bipartition==false && mask=="" && hsv==false){
-               std::cout << "meow2" << '\n';
                equalizationImageSlides(picture1, image2, r);
             }
             else{
@@ -67,14 +65,13 @@ int main(int argc, char* const* argv){
                      std::cout << "Error reading image 3" << '\n';
                      return 0;
                   }
-                  std::cout << "meow3" << '\n';
                   equalizationImageSlidesAndMask(picture1, picture2, image2, r);
                }
                else{
                   if(r==0 && bipartition==false && mask=="" && hsv==true){
                      cv::Mat picture3=cv::imread(image1);
                      if(picture3.rows==0){
-                        std::cout << "Error reading image 1" << '\n';
+                        std::cout << "Error reading image 4" << '\n';
                         return 0;
                      }
                      RGB(picture3, image2);
@@ -87,19 +84,29 @@ int main(int argc, char* const* argv){
                         if(r==0 && bipartition==true && mask!="" && hsv==false){
                            cv::Mat picture2=cv::imread(mask, cv::IMREAD_GRAYSCALE);
                            if(picture2.rows==0){
-                              std::cout << "Error reading image 3" << '\n';
+                              std::cout << "Error reading image 5" << '\n';
                               return 0;
                            }
                            biequalizationImagewithMask(picture1, picture2, image2);
                         }
                         else{
                            if(r>0 && bipartition==true && mask=="" && hsv==false){
-                              biequalizationImageSlides(picture1, r, image2);
+                              biequalizationImageSlides(picture1, image2, r);
                            }
                            else{
-                              std::cout << "Opciones incompatibles" << '\n';
-                              parser.printMessage();
-                              return 0;
+                              if(r>0 && bipartition==true && mask!="" && hsv==false){
+                                 cv::Mat picture2=cv::imread(mask, cv::IMREAD_GRAYSCALE);
+                                 if(picture2.rows==0){
+                                    std::cout << "Error reading image 6" << '\n';
+                                    return 0;
+                                 }
+                                 biequalizationImageSlidesAndMask(picture1, picture2, image2, r);
+                              }
+                              else{
+                                 std::cout << "Incompatible parameters" << '\n';
+                                 parser.printMessage();
+                                 return 0;
+                              }
                            }
                         }
                      }
@@ -113,8 +120,5 @@ int main(int argc, char* const* argv){
       std::cerr << "Exception: " << e.what() << std::endl;
       retCode=EXIT_FAILURE;
    }
-//---------------------------------------------------------------
-   // biequalizationImage(image, "hola.png");
-//---------------------------------------------------------------
    return retCode;
 }
