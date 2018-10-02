@@ -210,7 +210,7 @@ void biequalization(cv::Mat image, std::vector<int> & normalizado1, std::vector<
             ptr[j]=normalizado1[ptr[j]];
          }
          if(ptr[j] > b){
-            ptr[j]=normalizado2[ptr[j] - b + 1]; //aqui esta el error, alo mejor ptr[j] es 200 pero normalizado a lo mejor no tiene 200 :(
+            ptr[j]=normalizado2[ptr[j] - b + 1];
          }
       }
    }
