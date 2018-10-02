@@ -93,9 +93,14 @@ int main(int argc, char* const* argv){
                            biequalizationImagewithMask(picture1, picture2, image2);
                         }
                         else{
-                           std::cout << "Opciones incompatibles" << '\n';
-                           parser.printMessage();
-                           return 0;
+                           if(r>0 && bipartition==true && mask=="" && hsv==false){
+                              biequalizationImageSlides(picture1, r, image2);
+                           }
+                           else{
+                              std::cout << "Opciones incompatibles" << '\n';
+                              parser.printMessage();
+                              return 0;
+                           }
                         }
                      }
                   }

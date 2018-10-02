@@ -301,7 +301,7 @@ void biequalizationImagewithMask(cv::Mat image, cv::Mat mask, std::string newIma
 
    biequalizationMask(image, mask, normalizado1, normalizado2, b, newImage);
 }
-void biequalizationImageSlides(cv::Mat image, int r){
+void biequalizationImageSlides(cv::Mat image, int r, std::string newImage){
    std::vector<int> histogram;
    std::vector<int> histogram1;
    std::vector<int> histogram2;
@@ -309,15 +309,49 @@ void biequalizationImageSlides(cv::Mat image, int r){
    std::vector<int> normalizado1;
    std::vector<int> cumulative2;
    std::vector<int> normalizado2;
+   int b;
 
    for(int i=0; i<image.rows; i++){
-      uchar *ptr=image.ptr<uchar>(i)
+      uchar *ptr=image.ptr<uchar>(i);
       for(int j=0; j<image.cols; j++){
+         b=0;
          histogram.resize(256, 0);
-         getHistogramSlides(cv::Mat image, std::vector<int> & histogram, int i, int j, int r);
-         //me quedo aquí :)
+         getHistogramSlides(image, histogram, i, j, r);
+         std::vector<int> v=histogram;
+         std::sort(v.begin(), v.end());
+         b=calcularMediana(v);
+
+         histogram1.resize(0);
+         histogram2.resize(0);
+
+         for(int i=0; i<histogram.size(); i++){
+            if(i<=b){
+               histogram1.push_back(histogram[i]);
+            }
+            else{
+               histogram2.push_back(histogram[i]);
+            }
+         }
+
+         cumulative1.resize(histogram1.size(), 0);
+         cumulative2.resize(histogram2.size(), 0);
+         normalizado1.resize(histogram1.size(), 0);
+         normalizado2.resize(histogram2.size(), 0);
+
+         getCumulativeHistogram(histogram1, cumulative1);
+         normalize(cumulative1, normalizado1);
+         getCumulativeHistogram(histogram2, cumulative2);
+         normalize(cumulative2, normalizado2);
+
+         if(ptr[j] <= b){
+            ptr[j]=normalizado1[ptr[j]];
+         }
+         if(ptr[j] > b){
+            ptr[j]=normalizado2[ptr[j] - b + 1];
+         }
       }
    }
+   cv::imwrite(newImage, image);
 }
 int calcularMediana(std::vector<int> a){
    return (double)(a[(a.size()-1)/2] + a[a.size()/2])/2.0;
