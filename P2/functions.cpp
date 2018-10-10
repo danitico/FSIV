@@ -2,6 +2,31 @@
 #include <cmath>
 #include <iostream>
 #include <cstdlib>
+void normalizarImagen(cv::Mat & filtered){
+   float menor=filtered.at<float>(0,0), mayor=filtered.at<float>(0,0);
+   for(int i=0; i<filtered.rows; i++){
+      float *ptr=filtered.ptr<float>(i);
+      for(int j=0; j<filtered.cols; j++){
+         if(ptr[j]<menor){
+            menor=ptr[j];
+         }
+         else if(ptr[j]>mayor){
+            mayor=ptr[j];
+         }
+      }
+   }
+
+   float a=0.0;
+   for(int i=0; i<filtered.rows; i++){
+      float *ptr=filtered.ptr<float>(i);
+      for(int j=0; j<filtered.cols; j++){
+         a=(float)(ptr[j]-menor)/(float)(mayor-menor);
+         ptr[j]=(255*a);
+      }
+   }
+   // std::cout << "mayor: " << mayor << '\n';
+   // std::cout << "menor: " << menor << '\n';
+}
 void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
    int i_arriba=i;//debo de tener en cuenta los pixeles de la fila i
    int j_izquierda=j-1;
@@ -60,31 +85,32 @@ cv::Mat createBoxFilter(int r){
    cv::Mat filtro(2*r+1, 2*r+1, CV_32FC1);
 
    for(int i=0; i<filtro.rows; i++){
-      uchar *ptr=filtro.ptr<uchar>(i);
+      float *ptr=filtro.ptr<float>(i);
       for(int j=0; j<filtro.cols; j++){
-         ptr[j]=1/pow(2*r+1, 2);
+         ptr[j]=1/pow(filtro.rows, 2);
       }
    }
    return filtro;
 }
 void applyFilter(cv::Mat & in, cv::Mat & filtered, cv::Mat & filter){
    int r=(filter.rows - 1)/2;
-   cv::Mat a(2*r+1, 2*r+1, CV_32FC1);
    for(int i=r; i<filtered.rows-r; i++){
-      std::cout << "hola" << '\n';
       float *ptr=filtered.ptr<float>(i);
       for(int j=r; j<filtered.cols-r; j++){
+         cv::Mat a(2*r+1, 2*r+1, CV_32FC1);
          obtenerSubImagen(in, a, i, j, r);
          for(int k=0; k<filter.rows; k++){
             float *ptr1=a.ptr<float>(k);
             float *ptr2=filter.ptr<float>(k);
             for(int k1=0; k1<filter.cols; k1++){
                ptr[j]+=(ptr1[k1]*ptr2[k1]);
+               std::cout << "valor: " << ptr[j] << '\n';
             }
          }
       }
    }
-   cv::imwrite("prueba2.png", a);
+   normalizarImagen(filtered);
+   cv::imwrite("prueba2.png", filtered);
 }
 void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & out, int g, bool circular){
    cv::Mat filtered(in.rows, in.cols, CV_32FC1);
