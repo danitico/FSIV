@@ -26,6 +26,7 @@ int main(int argc, char* const* argv){
       }
       int r=parser.get<int>("r");
       int g=parser.get<int>("g");
+      int f=parser.get<int>("f");
       std::string image1=parser.get<std::string>("@image1");
       std::string image2=parser.get<std::string>("@image2");
 
@@ -43,9 +44,14 @@ int main(int argc, char* const* argv){
       picture1.convertTo(picture1, CV_32FC1);
       cv::Mat out(picture1.rows, picture1.cols, CV_32FC1);
 
-      cv::Mat filtro=createBoxFilter(r);
-      convolve(picture1, filtro, out, g);
+      if(f==0){
+         cv::Mat filtro=createBoxFilter(r);
+      }
+      else{
+         std::cout << "Hay que implementarlo ;)" << '\n';
+      }
 
+      convolve(picture1, filtro, out, g);
       cv::imwrite(image2, out);
    }
    catch(std::exception& e){
