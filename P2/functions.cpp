@@ -28,63 +28,73 @@ void normalizarImagen(cv::Mat & filtered){
    // std::cout << "menor: " << menor << '\n';
 }
 void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
-   int i_arriba=i;//debo de tener en cuenta los pixeles de la fila i
+   int i_arriba=i-1;//debo de tener en cuenta los pixeles de la fila i
    int j_izquierda=j-1;
    int j_derecha=j+1;
    int i_abajo=i+1;
    int i_elemento_cero=i-r;
    int j_elemento_cero=j-r;
-   int contador1=0;
+   int contador1=-1;
    int contador2=0;
    int contador3=0;
    int contador4=0;
 
-   while(i_arriba >= 0 && contador1 < r){
-      contador2=0;
-      j_izquierda=j-1;
-      while(j_izquierda >= 0 && contador2 < r){
-         subimage.at<float>(i_arriba - i_elemento_cero, j_izquierda - j_elemento_cero)=image.at<float>(i_arriba, j_izquierda);
-         std::cout << i_arriba - i_elemento_cero << " " << j_izquierda - j_elemento_cero << " valor: " << subimage.at<float>(i_arriba - i_elemento_cero, j_izquierda - j_elemento_cero) << '\n';
-         j_izquierda--;
-         contador2++;
-      }
-      contador3=0;
-      j_derecha=j+1;
+   for(int inicio=i; inicio>=0; inicio--){
+      if(contador1 < r){
+         subimage.at<float>(inicio - i_elemento_cero, j - j_elemento_cero)=image.at<float>(inicio, j);
+         // std::cout << inicio - i_elemento_cero << " " << j - j_elemento_cero << " valor: " << subimage.at<float>(inicio - i_elemento_cero, j - j_elemento_cero) << '\n';
 
-      while(j_derecha < image.cols - 1 && contador3 < r){
-         subimage.at<float>(i_arriba - i_elemento_cero, j_derecha - j_elemento_cero)=image.at<float>(i_arriba, j_derecha);
-         std::cout << i_arriba - i_elemento_cero << " " << j_derecha - j_elemento_cero << " valor: " << subimage.at<float>(i_arriba - i_elemento_cero, j_derecha - j_elemento_cero) << '\n';
-         j_derecha++;
-         contador3++;
+         contador2=0;
+         j_izquierda=j-1;
+         while(contador2 < r){
+            subimage.at<float>(inicio - i_elemento_cero, j_izquierda - j_elemento_cero)=image.at<float>(inicio, j_izquierda);
+            // std::cout << inicio - i_elemento_cero << " " << j_izquierda - j_elemento_cero << " valor: " << subimage.at<float>(inicio - i_elemento_cero, j_izquierda - j_elemento_cero) << '\n';
+            j_izquierda--;
+            contador2++;
+         }
+         contador3=0;
+         j_derecha=j+1;
+
+         while(contador3 < r){
+            subimage.at<float>(inicio - i_elemento_cero, j_derecha - j_elemento_cero)=image.at<float>(inicio, j_derecha);
+            // std::cout << inicio - i_elemento_cero << " " << j_derecha - j_elemento_cero << " valor: " << subimage.at<float>(inicio - i_elemento_cero, j_derecha - j_elemento_cero) << '\n';
+            j_derecha++;
+            contador3++;
+         }
+         contador1++;
       }
-      subimage.at<float>(i_arriba - i_elemento_cero, j - j_elemento_cero)=image.at<float>(i_arriba, j);
-      std::cout << i_arriba - i_elemento_cero << " " << j - j_elemento_cero << " valor: " << subimage.at<float>(i_arriba - i_elemento_cero, j - j_elemento_cero) << '\n';
-      i_arriba--;
-      contador1++;
+      else{
+         break;
+      }
    }
 
-   while(i_abajo < image.rows - 1 && contador4 < r){
-      contador2=0;
-      j_izquierda=j-1;
-      while(j_izquierda >= 0 && contador2 < r){
-         subimage.at<float>(i_abajo - i_elemento_cero, j_izquierda - j_elemento_cero)=image.at<float>(i_abajo, j_izquierda);
-         std::cout << i_abajo - i_elemento_cero << " " << j_izquierda - j_elemento_cero << " valor: " << subimage.at<float>(i_abajo - i_elemento_cero, j_izquierda - j_elemento_cero) << '\n';
-         j_izquierda--;
-         contador2++;
-      }
-      contador3=0;
-      j_derecha=j+1;
+   for(int inicio=i+1; inicio < image.rows; inicio++){
+      if(contador4 < r){
+         subimage.at<float>(inicio - i_elemento_cero, j - j_elemento_cero)=image.at<float>(inicio, j);
+         // std::cout << inicio - i_elemento_cero << " " << j - j_elemento_cero << " valor: " << subimage.at<float>(inicio - i_elemento_cero, j - j_elemento_cero) << '\n';
 
-      while(j_derecha < image.cols - 1 && contador3 < r){
-         subimage.at<float>(i_abajo - i_elemento_cero, j_derecha - j_elemento_cero)=image.at<float>(i_abajo, j_derecha);
-         std::cout << i_abajo - i_elemento_cero << " " << j_derecha - j_elemento_cero << " valor: " << subimage.at<float>(i_abajo - i_elemento_cero, j_derecha - j_elemento_cero) << '\n';
-         j_derecha++;
-         contador3++;
+         contador2=0;
+         j_izquierda=j-1;
+         while(contador2 < r){
+            subimage.at<float>(inicio - i_elemento_cero, j_izquierda - j_elemento_cero)=image.at<float>(inicio, j_izquierda);
+            // std::cout << inicio - i_elemento_cero << " " << j_izquierda - j_elemento_cero << " valor: " << subimage.at<float>(inicio - i_elemento_cero, j_izquierda - j_elemento_cero) << '\n';
+            j_izquierda--;
+            contador2++;
+         }
+         contador3=0;
+         j_derecha=j+1;
+
+         while(contador3 < r){
+            subimage.at<float>(inicio - i_elemento_cero, j_derecha - j_elemento_cero)=image.at<float>(inicio, j_derecha);
+            // std::cout << inicio - i_elemento_cero << " " << j_derecha - j_elemento_cero << " valor: " << subimage.at<float>(inicio - i_elemento_cero, j_derecha - j_elemento_cero) << '\n';
+            j_derecha++;
+            contador3++;
+         }
+         contador4++;
       }
-      subimage.at<float>(i_abajo - i_elemento_cero, j - j_elemento_cero)=image.at<float>(i_abajo, j);
-      std::cout << i_abajo - i_elemento_cero << " " << j - j_elemento_cero << " valor: " << subimage.at<float>(i_abajo - i_elemento_cero, j - j_elemento_cero) << '\n';
-      i_abajo++;
-      contador4++;
+      else{
+         break;
+      }
    }
 }
 cv::Mat createBoxFilter(int r){
@@ -105,33 +115,20 @@ void applyFilter(cv::Mat & in, cv::Mat & filtered, cv::Mat & filter){
       for(int j=r; j<filtered.cols-r; j++){
          cv::Mat a(2*r+1, 2*r+1, CV_32FC1);
          obtenerSubImagen(in, a, i, j, r);
-         std::cout << "++++++++++" << '\n';
          for(int k=0; k<filter.rows; k++){
             float *ptr1=a.ptr<float>(k);
-            // float *ptr2=filter.ptr<float>(k);
+            float *ptr2=filter.ptr<float>(k);
             for(int k1=0; k1<filter.cols; k1++){
-               std::cout << k << " " << k1 << " valor: " << ptr1[k1] << '\n';
-               // ptr[j]+=(ptr1[k1]*ptr2[k1]);
+               // std::cout << k << " " << k1 << " valor: " << ptr1[k1] << '\n';
+               ptr[j]+=(ptr1[k1]*ptr2[k1]);
             }
          }
-         std::cout << "----------" << '\n';
+         // std::cout << "----------" << '\n';
          // std::cout << i << " " << j << "valor: " << ptr[j] << '\n';
       }
    }
    // normalizarImagen(filtered);
-   // normalize(filtered, filtered, 0, 255, cv::NORM_MINMAX);
-   // cv::Mat prueba(6, 8, CV_32FC1);
-   // for(int i=0; i<6; i++){
-   //    float *ptr=prueba.ptr<float>(i);
-   //    for(int j=0; j<8; j++){
-   //       if(j>3){
-   //          ptr[j]=255;
-   //       }
-   //       else{
-   //          ptr[j]=0;
-   //       }
-   //    }
-   // }
+   normalize(filtered, filtered, 0, 255, cv::NORM_MINMAX);
    cv::imwrite("prueba2.png", filtered);
 }
 void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & out, int g, bool circular){
