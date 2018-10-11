@@ -42,17 +42,21 @@ int main(int argc, char* const* argv){
          return 0;
       }
       picture1.convertTo(picture1, CV_32FC1);
-      cv::Mat out(picture1.rows, picture1.cols, CV_32FC1);
+      cv::Mat filtered(picture1.rows, picture1.cols, CV_32FC1);
+      cv::Mat enhanced(picture1.rows, picture1.cols, CV_32FC1);
+      cv::Mat out=picture1.clone();
+		cv::Mat filtro;
 
       if(f==0){
-         cv::Mat filtro=createBoxFilter(r);
+         filtro=createBoxFilter(r);
       }
       else{
          std::cout << "Hay que implementarlo ;)" << '\n';
       }
 
-      convolve(picture1, filtro, out, g);
-      cv::imwrite(image2, out);
+      convolve(picture1, filtro, out);
+      enhance(picture1, out, enhanced, g);
+      cv::imwrite(image2, enhanced);
    }
    catch(std::exception& e){
       std::cerr << "Exception: " << e.what() << std::endl;

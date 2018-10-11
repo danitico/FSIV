@@ -37,12 +37,16 @@ void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
 
    for(int inicio=i; inicio>=0; inicio--){
       if(contador1 < r){
-         subimage.at<float>(inicio - i_elemento_cero, j - j_elemento_cero)=image.at<float>(inicio, j);
+         float *ptr=subimage.ptr<float>(inicio - i_elemento_cero);
+         float *ptr1=image.ptr<float>(inicio);
+         // subimage.at<float>(inicio - i_elemento_cero, j - j_elemento_cero)=image.at<float>(inicio, j);
+         ptr[j - j_elemento_cero]=ptr1[j];
 
          contador2=0;
          j_izquierda=j-1;
          while(contador2 < r){
-            subimage.at<float>(inicio - i_elemento_cero, j_izquierda - j_elemento_cero)=image.at<float>(inicio, j_izquierda);
+            // subimage.at<float>(inicio - i_elemento_cero, j_izquierda - j_elemento_cero)=image.at<float>(inicio, j_izquierda);
+            ptr[j_izquierda - j_elemento_cero]=ptr1[j_izquierda];
             j_izquierda--;
             contador2++;
          }
@@ -50,7 +54,8 @@ void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
          j_derecha=j+1;
 
          while(contador3 < r){
-            subimage.at<float>(inicio - i_elemento_cero, j_derecha - j_elemento_cero)=image.at<float>(inicio, j_derecha);
+            // subimage.at<float>(inicio - i_elemento_cero, j_derecha - j_elemento_cero)=image.at<float>(inicio, j_derecha);
+            ptr[j_derecha - j_elemento_cero]=ptr1[j_derecha];
             j_derecha++;
             contador3++;
          }
@@ -63,12 +68,16 @@ void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
 
    for(int inicio=i+1; inicio < image.rows; inicio++){
       if(contador4 < r){
-         subimage.at<float>(inicio - i_elemento_cero, j - j_elemento_cero)=image.at<float>(inicio, j);
+         float *ptr=subimage.ptr<float>(inicio - i_elemento_cero);
+         float *ptr1=image.ptr<float>(inicio);
+         // subimage.at<float>(inicio - i_elemento_cero, j - j_elemento_cero)=image.at<float>(inicio, j);
+         ptr[j - j_elemento_cero]=ptr1[j];
 
          contador2=0;
          j_izquierda=j-1;
          while(contador2 < r){
-            subimage.at<float>(inicio - i_elemento_cero, j_izquierda - j_elemento_cero)=image.at<float>(inicio, j_izquierda);
+            // subimage.at<float>(inicio - i_elemento_cero, j_izquierda - j_elemento_cero)=image.at<float>(inicio, j_izquierda);
+            ptr[j_izquierda - j_elemento_cero]=ptr1[j_izquierda];
             j_izquierda--;
             contador2++;
          }
@@ -76,7 +85,8 @@ void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
          j_derecha=j+1;
 
          while(contador3 < r){
-            subimage.at<float>(inicio - i_elemento_cero, j_derecha - j_elemento_cero)=image.at<float>(inicio, j_derecha);
+            // subimage.at<float>(inicio - i_elemento_cero, j_derecha - j_elemento_cero)=image.at<float>(inicio, j_derecha);
+            ptr[j_derecha - j_elemento_cero]=ptr1[j_derecha];
             j_derecha++;
             contador3++;
          }
@@ -114,20 +124,20 @@ void applyFilter(cv::Mat & in, cv::Mat & filtered, cv::Mat & filter){
          }
       }
    }
-   normalize(filtered, filtered, 0, 255, cv::NORM_MINMAX);
 }
-void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & out, int g, bool circular){
-   cv::Mat filtered=in.clone();
-
-   applyFilter(in, filtered, filter);
-
-   for(int i=0; i<out.rows; i++){
-      float *ptr=out.ptr<float>(i);
+void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & out, bool circular){
+   applyFilter(in, out, filter);
+   normalize(out, out, 0, 255, cv::NORM_MINMAX);
+   cv::imwrite("prueba2.png", out);
+}
+void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g){
+   for(int i=0; i<enhanced.rows; i++){
+      float *ptr=enhanced.ptr<float>(i);
       float *ptr1=in.ptr<float>(i);
       float *ptr2=filtered.ptr<float>(i);
-      for(int j=0; j<out.cols; j++){
+      for(int j=0; j<enhanced.cols; j++){
          ptr[j]=(g+1)*ptr1[j] - ptr2[j]*g;
       }
    }
-   normalize(out, out, 0, 255, cv::NORM_MINMAX);
+   normalize(enhanced, enhanced, 0, 255, cv::NORM_MINMAX);
 }
