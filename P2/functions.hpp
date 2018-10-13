@@ -1,8 +1,6 @@
 #ifndef FUNCTIONS_HPP
 #define FUNCTIONS_HPP
 #include <opencv2/core/core.hpp>
-#include <opencv2/highgui.hpp>//imread,imshow,namedWindow,waitKey
-// void normalizarImagen(cv::Mat & filtered);
 void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r);
 cv::Mat createBoxFilter(int r);
 cv::Mat createGaussianFilter(int r);

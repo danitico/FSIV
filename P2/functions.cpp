@@ -2,29 +2,6 @@
 #include <cmath>
 #include <iostream>
 #include <cstdlib>
-// void normalizarImagen(cv::Mat & filtered){
-//    float menor=filtered.at<float>(0,0), mayor=filtered.at<float>(0,0);
-//    for(int i=0; i<filtered.rows; i++){
-//       float *ptr=filtered.ptr<float>(i);
-//       for(int j=0; j<filtered.cols; j++){
-//          if(ptr[j]<menor){
-//             menor=ptr[j];
-//          }
-//          else if(ptr[j]>mayor){
-//             mayor=ptr[j];
-//          }
-//       }
-//    }
-//
-//    float a=0.0;
-//    for(int i=0; i<filtered.rows; i++){
-//       float *ptr=filtered.ptr<float>(i);
-//       for(int j=0; j<filtered.cols; j++){
-//          a=(float)(ptr[j]-menor)/(float)(mayor-menor);
-//          ptr[j]=(255*a);
-//       }
-//    }
-// }
 void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
    int j_izquierda=j-1;
    int j_derecha=j+1;
@@ -39,13 +16,11 @@ void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
       if(contador1 < r){
          float *ptr=subimage.ptr<float>(inicio - i_elemento_cero);
          float *ptr1=image.ptr<float>(inicio);
-         // subimage.at<float>(inicio - i_elemento_cero, j - j_elemento_cero)=image.at<float>(inicio, j);
          ptr[j - j_elemento_cero]=ptr1[j];
 
          contador2=0;
          j_izquierda=j-1;
          while(contador2 < r){
-            // subimage.at<float>(inicio - i_elemento_cero, j_izquierda - j_elemento_cero)=image.at<float>(inicio, j_izquierda);
             ptr[j_izquierda - j_elemento_cero]=ptr1[j_izquierda];
             j_izquierda--;
             contador2++;
@@ -54,7 +29,6 @@ void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
          j_derecha=j+1;
 
          while(contador3 < r){
-            // subimage.at<float>(inicio - i_elemento_cero, j_derecha - j_elemento_cero)=image.at<float>(inicio, j_derecha);
             ptr[j_derecha - j_elemento_cero]=ptr1[j_derecha];
             j_derecha++;
             contador3++;
@@ -70,13 +44,11 @@ void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
       if(contador4 < r){
          float *ptr=subimage.ptr<float>(inicio - i_elemento_cero);
          float *ptr1=image.ptr<float>(inicio);
-         // subimage.at<float>(inicio - i_elemento_cero, j - j_elemento_cero)=image.at<float>(inicio, j);
          ptr[j - j_elemento_cero]=ptr1[j];
 
          contador2=0;
          j_izquierda=j-1;
          while(contador2 < r){
-            // subimage.at<float>(inicio - i_elemento_cero, j_izquierda - j_elemento_cero)=image.at<float>(inicio, j_izquierda);
             ptr[j_izquierda - j_elemento_cero]=ptr1[j_izquierda];
             j_izquierda--;
             contador2++;
@@ -85,7 +57,6 @@ void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
          j_derecha=j+1;
 
          while(contador3 < r){
-            // subimage.at<float>(inicio - i_elemento_cero, j_derecha - j_elemento_cero)=image.at<float>(inicio, j_derecha);
             ptr[j_derecha - j_elemento_cero]=ptr1[j_derecha];
             j_derecha++;
             contador3++;
@@ -127,7 +98,6 @@ void applyFilter(cv::Mat & in, cv::Mat & filtered, cv::Mat & filter){
 }
 void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & filtered, bool circular){
    applyFilter(in, filtered, filter);
-   cv::imwrite("prueba2.png", filtered);
 }
 void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g){
    for(int i=0; i<enhanced.rows; i++){
@@ -138,5 +108,4 @@ void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g){
          ptr[j]=(g+1)*ptr1[j] - ptr2[j]*g;
       }
    }
-   // normalize(enhanced, enhanced, 0, 255, cv::NORM_MINMAX);
 }
