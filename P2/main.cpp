@@ -36,7 +36,7 @@ int main(int argc, char* const* argv){
          return 0;
       }
 
-      cv::Mat picture1=cv::imread(image1, cv::IMREAD_GRAYSCALE);
+      cv::Mat picture1=cv::imread(image1, CV_LOAD_IMAGE_GRAYSCALE);
       if(picture1.rows==0){
          std::cout << "Error reading image 1" << '\n';
          return 0;
@@ -44,8 +44,7 @@ int main(int argc, char* const* argv){
       picture1.convertTo(picture1, CV_32FC1);
       cv::Mat filtered(picture1.rows, picture1.cols, CV_32FC1);
       cv::Mat enhanced(picture1.rows, picture1.cols, CV_32FC1);
-      cv::Mat out=picture1.clone();
-		cv::Mat filtro;
+      cv::Mat filtro;
 
       if(f==0){
          filtro=createBoxFilter(r);
@@ -54,8 +53,8 @@ int main(int argc, char* const* argv){
          std::cout << "Hay que implementarlo ;)" << '\n';
       }
 
-      convolve(picture1, filtro, out);
-      enhance(picture1, out, enhanced, g);
+      convolve(picture1, filtro, filtered);
+      enhance(picture1, filtered, enhanced, g);
       cv::imwrite(image2, enhanced);
    }
    catch(std::exception& e){

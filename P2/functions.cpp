@@ -125,10 +125,9 @@ void applyFilter(cv::Mat & in, cv::Mat & filtered, cv::Mat & filter){
       }
    }
 }
-void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & out, bool circular){
-   applyFilter(in, out, filter);
-   normalize(out, out, 0, 255, cv::NORM_MINMAX);
-   cv::imwrite("prueba2.png", out);
+void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & filtered, bool circular){
+   applyFilter(in, filtered, filter);
+   cv::imwrite("prueba2.png", filtered);
 }
 void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g){
    for(int i=0; i<enhanced.rows; i++){
@@ -139,5 +138,5 @@ void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g){
          ptr[j]=(g+1)*ptr1[j] - ptr2[j]*g;
       }
    }
-   normalize(enhanced, enhanced, 0, 255, cv::NORM_MINMAX);
+   // normalize(enhanced, enhanced, 0, 255, cv::NORM_MINMAX);
 }
