@@ -11,6 +11,7 @@ const cv::String keys =
    "{gain g         |1     | biequalization of the image       }"
    "{filter f       |0     | It selects the type of filter     }"
    "{circular c     |      | The border pixels will be procesed using the opposite pixels}"
+   "{hsv            |      | hsv stuff}"
    "{@image1        |<none>| The input image                   }"
    "{@image2        |<none>| The output image                  }"
    ;
@@ -27,6 +28,7 @@ int main(int argc, char* const* argv){
       int r=parser.get<int>("r");
       int g=parser.get<int>("g");
       int f=parser.get<int>("f");
+      bool hsv=parser.has("hsv");
       std::string image1=parser.get<std::string>("@image1");
       std::string image2=parser.get<std::string>("@image2");
 
@@ -35,27 +37,34 @@ int main(int argc, char* const* argv){
          parser.printMessage();
          return 0;
       }
+      if(!hsv){
+         cv::Mat picture1=cv::imread(image1, CV_LOAD_IMAGE_GRAYSCALE);
+         if(picture1.rows==0){
+            std::cout << "Error reading image 1" << '\n';
+            return 0;
+         }
+         picture1.convertTo(picture1, CV_32FC1);
+         cv::Mat filtered(picture1.rows, picture1.cols, CV_32FC1);
+         cv::Mat enhanced(picture1.rows, picture1.cols, CV_32FC1);
+         cv::Mat filtro;
 
-      cv::Mat picture1=cv::imread(image1, CV_LOAD_IMAGE_GRAYSCALE);
-      if(picture1.rows==0){
-         std::cout << "Error reading image 1" << '\n';
-         return 0;
-      }
-      picture1.convertTo(picture1, CV_32FC1);
-      cv::Mat filtered(picture1.rows, picture1.cols, CV_32FC1);
-      cv::Mat enhanced(picture1.rows, picture1.cols, CV_32FC1);
-      cv::Mat filtro;
+         if(f==0){
+            filtro=createBoxFilter(r);
+         }
+         else{
+            std::cout << "Hay que implementarlo ;)" << '\n';
+         }
 
-      if(f==0){
-         filtro=createBoxFilter(r);
+         convolve(picture1, filtro, filtered);
+         enhance(picture1, filtered, enhanced, g);
+         cv::imwrite(image2, enhanced);
       }
       else{
-         std::cout << "Hay que implementarlo ;)" << '\n';
+         cv::Mat picture2=cv::imread(image1, CV_LOAD_IMAGE_ANYCOLOR);
+         cv::Mat out;
+         RGB(picture2, out, r, g, f);
+         cv::imwrite(image2, out);
       }
-
-      convolve(picture1, filtro, filtered);
-      enhance(picture1, filtered, enhanced, g);
-      cv::imwrite(image2, enhanced);
    }
    catch(std::exception& e){
       std::cerr << "Exception: " << e.what() << std::endl;

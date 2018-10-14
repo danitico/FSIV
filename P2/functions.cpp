@@ -1,4 +1,5 @@
 #include "functions.hpp"
+#include <opencv2/imgproc.hpp>
 #include <cmath>
 #include <iostream>
 #include <cstdlib>
@@ -105,4 +106,37 @@ void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g){
          ptr[j]=(g+1)*ptr1[j] - ptr2[j]*g;
       }
    }
+}
+void RGB(cv::Mat const & in, cv::Mat & out, int r, int g, int f){
+   cv::Mat HSV[3];
+   cv::Mat input=in.clone();
+   cv::Mat filter;
+   cv::Mat filtered(in.rows, in.cols, CV_32FC1);
+   cv::Mat enhanced(in.rows, in.cols, CV_32FC1);
+
+   cv::cvtColor(input, input, cv::COLOR_RGB2HSV);
+   split(input, HSV);
+   HSV[2].convertTo(HSV[2], CV_32FC1);
+
+   if(f==0){
+      filter=createBoxFilter(r);
+   }
+   else{
+      std::cout << "hay que implementarlo" << '\n';
+   }
+
+   convolve(HSV[2], filter, filtered);
+   enhance(HSV[2], filtered, enhanced, g);
+
+   for(int i=0; i<HSV[2].rows; i++){
+      float *ptr=HSV[2].ptr<float>(i);
+      float *ptr1=enhanced.ptr<float>(i);
+      for(int j=0; j<HSV[2].cols; j++){
+         ptr[j]=ptr1[j];
+      }
+   }
+   HSV[2].convertTo(HSV[2], CV_8UC1);
+
+   cv::merge(HSV, 3, out);
+   cv::cvtColor(out, out, cv::COLOR_HSV2RGB);
 }
