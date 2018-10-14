@@ -1,4 +1,3 @@
-#include <opencv2/highgui.hpp>//imread,imshow,namedWindow,waitKey
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/utility.hpp>
 #include <iostream>
@@ -11,7 +10,8 @@ const cv::String keys =
    "{gain g         |1     | biequalization of the image       }"
    "{filter f       |0     | It selects the type of filter     }"
    "{circular c     |      | The border pixels will be procesed using the opposite pixels}"
-   "{hsv            |      | hsv stuff}"
+   "{hsv            |      | hsv stuff                         }"
+   "{interactive i  |      | interactive mode                  }"
    "{@image1        |<none>| The input image                   }"
    "{@image2        |<none>| The output image                  }"
    ;
@@ -29,6 +29,7 @@ int main(int argc, char* const* argv){
       int g=parser.get<int>("g");
       int f=parser.get<int>("f");
       bool hsv=parser.has("hsv");
+      bool i=parser.has("i");
       std::string image1=parser.get<std::string>("@image1");
       std::string image2=parser.get<std::string>("@image2");
 
@@ -37,7 +38,14 @@ int main(int argc, char* const* argv){
          parser.printMessage();
          return 0;
       }
-      if(!hsv){
+      if(i){
+         int prueba=0;
+         cv::namedWindow("Prueba"); // Create Window
+         cv::createTrackbar("Barritas", "Prueba", &prueba, 10, on_trackbar);
+         on_trackbar(prueba, 0);
+         cv::waitKey(0);
+      }
+      else if(!hsv){
          cv::Mat picture1=cv::imread(image1, CV_LOAD_IMAGE_GRAYSCALE);
          if(picture1.rows==0){
             std::cout << "Error reading image 1" << '\n';
