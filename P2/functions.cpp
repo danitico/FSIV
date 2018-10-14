@@ -22,10 +22,10 @@ void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
          j_izquierda=j-1;
          while(contador2 < r){
             ptr[j_izquierda - j_elemento_cero]=ptr1[j_izquierda];
-            j_izquierda--;
             contador2++;
          }
          contador3=0;
+         j_izquierda--;
          j_derecha=j+1;
 
          while(contador3 < r){
@@ -79,7 +79,7 @@ cv::Mat createBoxFilter(int r){
    }
    return filtro;
 }
-void applyFilter(cv::Mat & in, cv::Mat & filtered, cv::Mat & filter){
+void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & filtered, bool circular){
    int r=(filter.rows - 1)/2;
    for(int i=r; i<filtered.rows-r; i++){
       float *ptr=filtered.ptr<float>(i);
@@ -95,9 +95,6 @@ void applyFilter(cv::Mat & in, cv::Mat & filtered, cv::Mat & filter){
          }
       }
    }
-}
-void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & filtered, bool circular){
-   applyFilter(in, filtered, filter);
 }
 void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g){
    for(int i=0; i<enhanced.rows; i++){
