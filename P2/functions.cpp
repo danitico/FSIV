@@ -90,7 +90,6 @@ cv::Mat createGaussianFilter(int r){
       for(int j=0; j<filtro.cols; j++){
          float a=-(1/2)*((pow(i, 2)/sigma) + (pow(j, 2)/sigma));
          ptr[j]=1/(2*pi*sigma)*exp(a);
-         std::cout << ptr[j] << '\n';
       }
    }
    return filtro;
@@ -100,19 +99,27 @@ void applyFilter(cv::Mat & in, cv::Mat & filtered, cv::Mat & filter){
    for(int i=r; i<filtered.rows-r; i++){
       float *ptr=filtered.ptr<float>(i);
       for(int j=r; j<filtered.cols-r; j++){
-         cv::Mat a(2*r+1, 2*r+1, CV_32FC1);
+         cv::Mat a(2*r+1, 2*r+1, CV_32FC1, 0.0);
          obtenerSubImagen(in, a, i, j, r);
          for(int k=0; k<filter.rows; k++){
             float *ptr1=a.ptr<float>(k);
             float *ptr2=filter.ptr<float>(k);
             for(int k1=0; k1<filter.cols; k1++){
+               // std::cout << ptr1[k1] << '\n';
                ptr[j]+=(ptr1[k1]*ptr2[k1]);
             }
          }
+         // std::cout << ptr[j] << '\n';
       }
    }
 }
 void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & filtered, bool circular){
+   for(int i=0; i<filtered.rows; i++){
+      float *ptr=filtered.ptr<float>(i);
+      for(int j=0; j<filtered.cols; j++){
+         ptr[j]=0;
+      }
+   }
    applyFilter(in, filtered, filter);
 }
 void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g){

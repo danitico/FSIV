@@ -44,11 +44,19 @@ int main(int argc, char* const* argv){
          picture1.convertTo(picture1, CV_32FC1);
          cv::Mat filtered(picture1.rows, picture1.cols, CV_32FC1);
          cv::Mat enhanced(picture1.rows, picture1.cols, CV_32FC1);
+         for(int i=0; i<enhanced.rows; i++){
+            float *ptr=enhanced.ptr<float>(i);
+            for(int j=0; j<enhanced.cols; j++){
+               ptr[j]=0;
+               // std::cout << ptr[j] << '\n';
+            }
+         }
+
          cv::Mat filtro;
 
          if(f==0){
-            createGaussianFilter(r);
             filtro=createBoxFilter(r);
+            std::cout << "hola" << '\n';
          }
          else{
             std::cout << "Hay que implementarlo ;)" << '\n';
