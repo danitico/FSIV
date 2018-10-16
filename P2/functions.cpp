@@ -70,7 +70,7 @@ void obtenerSubImagen(cv::Mat & image, cv::Mat & subimage, int i, int j, int r){
    }
 }
 cv::Mat createBoxFilter(int r){
-   cv::Mat filtro(2*r+1, 2*r+1, CV_32FC1);
+   cv::Mat filtro(2*r+1, 2*r+1, CV_32FC1, 0.0);
 
    for(int i=0; i<filtro.rows; i++){
       float *ptr=filtro.ptr<float>(i);
@@ -81,15 +81,16 @@ cv::Mat createBoxFilter(int r){
    return filtro;
 }
 cv::Mat createGaussianFilter(int r){
-   cv::Mat filtro(2*r+1, 2*r+1, CV_32FC1);
+   cv::Mat filtro(2*r+1, 2*r+1, CV_32FC1, 0.0);
    float sigma=1;
    const double pi = 3.1415926535897;
 
    for(int i=0; i<filtro.rows; i++){
       float *ptr=filtro.ptr<float>(i);
       for(int j=0; j<filtro.cols; j++){
-         float a=-(1/2)*((pow(i, 2)/sigma) + (pow(j, 2)/sigma));
-         ptr[j]=1/(2*pi*sigma)*exp(a);
+         float a=((pow(i-r, 2)/sigma) + (pow(j-r, 2)/sigma))/2.0;
+         a=-a;
+         ptr[j]=(1.0/(2*pi*sigma))*exp(a);
       }
    }
    return filtro;
@@ -105,21 +106,13 @@ void applyFilter(cv::Mat & in, cv::Mat & filtered, cv::Mat & filter){
             float *ptr1=a.ptr<float>(k);
             float *ptr2=filter.ptr<float>(k);
             for(int k1=0; k1<filter.cols; k1++){
-               // std::cout << ptr1[k1] << '\n';
                ptr[j]+=(ptr1[k1]*ptr2[k1]);
             }
          }
-         // std::cout << ptr[j] << '\n';
       }
    }
 }
 void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & filtered, bool circular){
-   for(int i=0; i<filtered.rows; i++){
-      float *ptr=filtered.ptr<float>(i);
-      for(int j=0; j<filtered.cols; j++){
-         ptr[j]=0;
-      }
-   }
    applyFilter(in, filtered, filter);
 }
 void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g){
@@ -131,14 +124,13 @@ void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g){
          ptr[j]=(g+1)*ptr1[j] - ptr2[j]*g;
       }
    }
-   enhanced.convertTo(enhanced, CV_8UC1);
 }
 void RGB(cv::Mat const & in, cv::Mat & out, int r, int g, int f){
    cv::Mat HSV[3];
    cv::Mat input=in.clone();
    cv::Mat filter;
-   cv::Mat filtered(in.rows, in.cols, CV_32FC1);
-   cv::Mat enhanced(in.rows, in.cols, CV_32FC1);
+   cv::Mat filtered(in.rows, in.cols, CV_32FC1, 0.0);
+   cv::Mat enhanced(in.rows, in.cols, CV_32FC1, 0.0);
 
    cv::cvtColor(input, input, cv::COLOR_RGB2HSV);
    split(input, HSV);
@@ -148,7 +140,7 @@ void RGB(cv::Mat const & in, cv::Mat & out, int r, int g, int f){
       filter=createBoxFilter(r);
    }
    else{
-      std::cout << "hay que implementarlo" << '\n';
+      filter=createGaussianFilter(r);
    }
 
    convolve(HSV[2], filter, filtered);

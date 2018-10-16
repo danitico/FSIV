@@ -42,33 +42,26 @@ int main(int argc, char* const* argv){
             return 0;
          }
          picture1.convertTo(picture1, CV_32FC1);
-         cv::Mat filtered(picture1.rows, picture1.cols, CV_32FC1);
-         cv::Mat enhanced(picture1.rows, picture1.cols, CV_32FC1);
-         for(int i=0; i<enhanced.rows; i++){
-            float *ptr=enhanced.ptr<float>(i);
-            for(int j=0; j<enhanced.cols; j++){
-               ptr[j]=0;
-               // std::cout << ptr[j] << '\n';
-            }
-         }
+         cv::Mat filtered(picture1.rows, picture1.cols, CV_32FC1, 0.0);
+         cv::Mat enhanced(picture1.rows, picture1.cols, CV_32FC1, 0.0);
 
          cv::Mat filtro;
 
          if(f==0){
             filtro=createBoxFilter(r);
-            std::cout << "hola" << '\n';
          }
          else{
-            std::cout << "Hay que implementarlo ;)" << '\n';
+            filtro=createGaussianFilter(r);
          }
 
          convolve(picture1, filtro, filtered);
          enhance(picture1, filtered, enhanced, g);
+         enhanced.convertTo(enhanced, CV_8UC1);
          cv::imwrite(image2, enhanced);
       }
       else{
          cv::Mat picture2=cv::imread(image1, CV_LOAD_IMAGE_ANYCOLOR);
-         cv::Mat out;
+         cv::Mat out(picture2.rows, picture2.cols, CV_32FC1, 0.0);
          RGB(picture2, out, r, g, f);
          cv::imwrite(image2, out);
       }
