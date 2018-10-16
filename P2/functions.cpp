@@ -82,7 +82,7 @@ cv::Mat createBoxFilter(int r){
 }
 cv::Mat createGaussianFilter(int r){
    cv::Mat filtro(2*r+1, 2*r+1, CV_32FC1, 0.0);
-   float sigma=1;
+   float sigma=(2*r + 1)/6.0;
    const double pi = 3.1415926535897;
 
    for(int i=0; i<filtro.rows; i++){
