@@ -80,7 +80,7 @@ cv::Mat createBoxFilter(int r){
    }
    return filtro;
 }
-void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & filtered, bool circular){
+void applyFilter(cv::Mat & in, cv::Mat & filtered, cv::Mat & filter){
    int r=(filter.rows - 1)/2;
    for(int i=r; i<filtered.rows-r; i++){
       float *ptr=filtered.ptr<float>(i);
@@ -96,6 +96,9 @@ void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & filtered, bool circular)
          }
       }
    }
+}
+void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & filtered, bool circular){
+   applyFilter(in, filtered, filter);
 }
 void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g){
    for(int i=0; i<enhanced.rows; i++){
