@@ -9,5 +9,4 @@ void applyFilter(cv::Mat & in, cv::Mat & filtered, cv::Mat & filter);
 void convolve(cv::Mat & in, cv::Mat & filter, cv::Mat & filtered, bool circular=false);
 void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g);
 void RGB(cv::Mat const & in, cv::Mat & out, int r, int g, int f);
-void on_trackbar(int g, void* a);
 #endif

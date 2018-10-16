@@ -9,9 +9,7 @@ const cv::String keys =
    "{radius r       |1     | It controls the size of the filter}"
    "{gain g         |1     | biequalization of the image       }"
    "{filter f       |0     | It selects the type of filter     }"
-   "{circular c     |      | The border pixels will be procesed using the opposite pixels}"
    "{hsv            |      | hsv stuff                         }"
-   "{interactive i  |      | interactive mode                  }"
    "{@image1        |<none>| The input image                   }"
    "{@image2        |<none>| The output image                  }"
    ;
@@ -29,7 +27,6 @@ int main(int argc, char* const* argv){
       int g=parser.get<int>("g");
       int f=parser.get<int>("f");
       bool hsv=parser.has("hsv");
-      bool i=parser.has("i");
       std::string image1=parser.get<std::string>("@image1");
       std::string image2=parser.get<std::string>("@image2");
 
@@ -38,14 +35,7 @@ int main(int argc, char* const* argv){
          parser.printMessage();
          return 0;
       }
-      if(i){
-         int prueba=0;
-         cv::namedWindow("Prueba"); // Create Window
-         cv::createTrackbar("Barritas", "Prueba", &prueba, 10, on_trackbar);
-         on_trackbar(prueba, 0);
-         cv::waitKey(0);
-      }
-      else if(!hsv){
+      if(!hsv){
          cv::Mat picture1=cv::imread(image1, CV_LOAD_IMAGE_GRAYSCALE);
          if(picture1.rows==0){
             std::cout << "Error reading image 1" << '\n';
@@ -57,6 +47,7 @@ int main(int argc, char* const* argv){
          cv::Mat filtro;
 
          if(f==0){
+            createGaussianFilter(r);
             filtro=createBoxFilter(r);
          }
          else{

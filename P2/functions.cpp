@@ -80,6 +80,21 @@ cv::Mat createBoxFilter(int r){
    }
    return filtro;
 }
+cv::Mat createGaussianFilter(int r){
+   cv::Mat filtro(2*r+1, 2*r+1, CV_32FC1);
+   float sigma=1;
+   const double pi = 3.1415926535897;
+
+   for(int i=0; i<filtro.rows; i++){
+      float *ptr=filtro.ptr<float>(i);
+      for(int j=0; j<filtro.cols; j++){
+         float a=-(1/2)*((pow(i, 2)/sigma) + (pow(j, 2)/sigma));
+         ptr[j]=1/(2*pi*sigma)*exp(a);
+         std::cout << ptr[j] << '\n';
+      }
+   }
+   return filtro;
+}
 void applyFilter(cv::Mat & in, cv::Mat & filtered, cv::Mat & filter){
    int r=(filter.rows - 1)/2;
    for(int i=r; i<filtered.rows-r; i++){
@@ -109,6 +124,7 @@ void enhance(cv::Mat & in, cv::Mat & filtered, cv::Mat & enhanced, int g){
          ptr[j]=(g+1)*ptr1[j] - ptr2[j]*g;
       }
    }
+   enhanced.convertTo(enhanced, CV_8UC1);
 }
 void RGB(cv::Mat const & in, cv::Mat & out, int r, int g, int f){
    cv::Mat HSV[3];
@@ -142,26 +158,4 @@ void RGB(cv::Mat const & in, cv::Mat & out, int r, int g, int f){
 
    cv::merge(HSV, 3, out);
    cv::cvtColor(out, out, cv::COLOR_HSV2RGB);
-}
-void on_trackbar(int g, void* a){
-   cv::Mat picture1=cv::imread("original.png", CV_LOAD_IMAGE_GRAYSCALE);
-   if(picture1.rows==0){
-      std::cout << "Error reading image 1" << '\n';
-      exit(-1);
-   }
-
-   picture1.convertTo(picture1, CV_32FC1);
-   cv::Mat filtered(picture1.rows, picture1.cols, CV_32FC1);
-   cv::Mat enhanced(picture1.rows, picture1.cols, CV_32FC1);
-   cv::Mat filtro;
-
-   // if(f==0){
-      filtro=createBoxFilter(1);
-   // }
-   // else{
-      // std::cout << "Hay que implementarlo ;)" << '\n';
-   // }
-   convolve(picture1, filtro, filtered);
-   enhance(picture1, filtered, enhanced, g);
-   cv::imshow("Prueba", enhanced);
 }
