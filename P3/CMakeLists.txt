@@ -1,0 +1,7 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+PROJECT(P2)
+FIND_PACKAGE(OpenCV 	REQUIRED )
+include_directories ("${OpenCV_INCLUDE_DIRS}")
+SET(CMAKE_CXX_FLAGS "-g -lm")
+LINK_LIBRARIES(${OpenCV_LIBS} )
+add_executable(ejemplo ejemplo.cpp)
