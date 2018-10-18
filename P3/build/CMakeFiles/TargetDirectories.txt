@@ -1,3 +1,0 @@
-/home/daniel/Desktop/TERCERO_CARRERA/FSIV/P3/build/CMakeFiles/rebuild_cache.dir
-/home/daniel/Desktop/TERCERO_CARRERA/FSIV/P3/build/CMakeFiles/ejemplo.dir
-/home/daniel/Desktop/TERCERO_CARRERA/FSIV/P3/build/CMakeFiles/edit_cache.dir
