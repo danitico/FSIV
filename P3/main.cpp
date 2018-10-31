@@ -1,17 +1,19 @@
 #include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/core/utility.hpp>
+#include <opencv2/videoio.hpp>
 #include <iostream>
 #include <exception>
 #include <string>
 #include "functions.hpp"
 const cv::String keys =
    "{help h usage ? |      | print this message                }"
-   "{radius r       |1     | It controls the size of the filter}"
-   "{gain g         |1     | biequalization of the image       }"
-   "{filter f       |0     | It selects the type of filter     }"
-   "{hsv            |      | hsv stuff                         }"
-   "{@image1        |<none>| The input image                   }"
-   "{@image2        |<none>| The output image                  }"
+   "{@rows          |<none>| Rows of the chessboard            }"
+   "{@cols          |<none>| Columns of the chessboard         }"
+   "{@size          |<none>| Size                              }"
+   "{@file          |<none>| yaml file                         }"
+   "{@video         |<none>| The input video                   }"
    ;
 int main(int argc, char* const* argv){
    int retCode=EXIT_SUCCESS;
@@ -23,47 +25,35 @@ int main(int argc, char* const* argv){
          parser.printMessage();
          return 0;
       }
-      int r=parser.get<int>("r");
-      int g=parser.get<int>("g");
-      int f=parser.get<int>("f");
-      bool hsv=parser.has("hsv");
-      std::string image1=parser.get<std::string>("@image1");
-      std::string image2=parser.get<std::string>("@image2");
+      int rows=parser.get<int>("@rows");
+      int cols=parser.get<int>("@cols");
+      int size=parser.get<int>("@size");
+      std::string file=parser.get<std::string>("@file");
+      std::string input=parser.get<std::string>("@video");
 
       if(!parser.check()){
          parser.printErrors();
          parser.printMessage();
          return 0;
       }
-      if(!hsv){
-         cv::Mat picture1=cv::imread(image1, CV_LOAD_IMAGE_GRAYSCALE);
-         if(picture1.rows==0){
-            std::cout << "Error reading image 1" << '\n';
-            return 0;
-         }
-         picture1.convertTo(picture1, CV_32FC1);
-         cv::Mat filtered(picture1.rows, picture1.cols, CV_32FC1, 0.0);
-         cv::Mat enhanced(picture1.rows, picture1.cols, CV_32FC1, 0.0);
+      cv::Mat frame;
+      cv::VideoCapture video(input);
 
-         cv::Mat filtro;
+      while(video.read(frame)){
+         cv::Mat corners;
+         cv::Size xy(rows,cols);
+         cv::Mat frameButInGrey;
+         cv::cvtColor(frame, frameButInGrey, cv::COLOR_BGR2GRAY);
 
-         if(f==0){
-            filtro=createBoxFilter(r);
+         bool patternfound=cv::findChessboardCorners(frame,xy,corners);
+         cv::cornerSubPix(frameButInGrey,corners,cv::Size(5,5), cv::Size(-1,-1), cv::TermCriteria());
+         cv::Mat rvec,tvec;
+         drawChessboardCorners(frame, xy, cv::Mat(corners), patternfound);
+         // cv::solvePnP(,,l.cameraMatrix1,l.distortionCoefficient1,rvec,tvec);
+         cv::imshow("Live", frame);
+         if(cv::waitKey(5)>=0){
+            break;
          }
-         else{
-            filtro=createGaussianFilter(r);
-         }
-
-         convolve(picture1, filtro, filtered);
-         enhance(picture1, filtered, enhanced, g);
-         enhanced.convertTo(enhanced, CV_8UC1);
-         cv::imwrite(image2, enhanced);
-      }
-      else{
-         cv::Mat picture2=cv::imread(image1, CV_LOAD_IMAGE_ANYCOLOR);
-         cv::Mat out(picture2.rows, picture2.cols, CV_32FC1, 0.0);
-         RGB(picture2, out, r, g, f);
-         cv::imwrite(image2, out);
       }
    }
    catch(std::exception& e){
