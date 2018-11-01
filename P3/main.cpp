@@ -3,6 +3,9 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/core/utility.hpp>
 #include <opencv2/videoio.hpp>
+#include <opencv2/core/persistence.hpp>
+#include <opencv2/core/types_c.h>
+#include <cassert>
 #include <iostream>
 #include <exception>
 #include <string>
@@ -36,20 +39,40 @@ int main(int argc, char* const* argv){
          parser.printMessage();
          return 0;
       }
+
       cv::Mat frame;
+      cv::FileStorage descriptor(file, cv::FileStorage::READ);
       cv::VideoCapture video(input);
+      cv::Mat cameraMatrix, distortionCoefficients, image_points;
+      descriptor["camera_matrix"] >> cameraMatrix;
+      descriptor["distortion_coefficients"] >> distortionCoefficients;
+
+      std::vector<cv::Point3f> objectPoints;
+      for(float y=0.0; y<cols; y++){
+         for(float x=0.0; x<rows; x++){
+            objectPoints.push_back(cv::Point3f(x*size, y*size, 0.0));
+         }
+      }
+
 
       while(video.read(frame)){
-         cv::Mat corners;
-         cv::Size xy(rows,cols);
-         cv::Mat frameButInGrey;
-         cv::cvtColor(frame, frameButInGrey, cv::COLOR_BGR2GRAY);
+         std::vector<cv::Point2f> corners;
+         cv::Mat a;
+         cv::Size patternSize(rows,cols);
+         cv::Mat GreyFrame;
 
-         bool patternfound=cv::findChessboardCorners(frame,xy,corners);
-         cv::cornerSubPix(frameButInGrey,corners,cv::Size(5,5), cv::Size(-1,-1), cv::TermCriteria());
+         bool patternfound=cv::findChessboardCorners(frame, patternSize, corners, cv::CALIB_CB_ADAPTIVE_THRESH +
+                                                                                  cv::CALIB_CB_NORMALIZE_IMAGE +
+                                                                                  cv::CALIB_CB_FAST_CHECK);
+
          cv::Mat rvec,tvec;
-         drawChessboardCorners(frame, xy, cv::Mat(corners), patternfound);
-         // cv::solvePnP(,,l.cameraMatrix1,l.distortionCoefficient1,rvec,tvec);
+         if(patternfound){
+            cv::cvtColor(frame, GreyFrame, cv::COLOR_RGB2GRAY);
+            cv::cornerSubPix(GreyFrame, corners, cv::Size(5, 5), cv::Size(-1,-1), cv::TermCriteria());
+            drawChessboardCorners(frame, patternSize, cv::Mat(corners), patternfound);
+            cv::solvePnP(objectPoints, corners, cameraMatrix, distortionCoefficients, rvec, tvec);
+         }
+
          cv::imshow("Live", frame);
          if(cv::waitKey(5)>=0){
             break;
