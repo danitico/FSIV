@@ -8,6 +8,7 @@
 #include <cassert>
 #include <iostream>
 #include <exception>
+#include <unistd.h>
 #include <string>
 #include "functions.hpp"
 const cv::String keys =
@@ -48,11 +49,22 @@ int main(int argc, char* const* argv){
       descriptor["distortion_coefficients"] >> distortionCoefficients;
 
       std::vector<cv::Point3f> objectPoints;
-      for(float y=0.0; y<cols; y++){
-         for(float x=0.0; x<rows; x++){
-            objectPoints.push_back(cv::Point3f(x*size, y*size, 0.0));
+      for(float y=0; y<cols; y++){
+         for(float x=0; x<rows; x++){
+            objectPoints.push_back(cv::Point3f(x*size, y*size, 0));
          }
       }
+
+      std::vector<cv::Point3f> prueba;
+      prueba.push_back(cv::Point3f((rows/2)*size,(cols/2)*size,0));
+      prueba.push_back(cv::Point3f(((rows/2)+1)*size,(cols/2)*size,0));
+      prueba.push_back(cv::Point3f((rows/2)*size,((cols/2)+1)*size,0));
+      prueba.push_back(cv::Point3f((rows/2)*size,(cols/2)*size,-size));
+
+      // prueba.push_back(cv::Point3f(0, 0, 0));
+      // prueba.push_back(cv::Point3f(30, 0, 0));
+      // prueba.push_back(cv::Point3f(0, 30, 0));
+      // prueba.push_back(cv::Point3f(0, 0, -30));
 
 
       while(video.read(frame)){
@@ -64,16 +76,22 @@ int main(int argc, char* const* argv){
          bool patternfound=cv::findChessboardCorners(frame, patternSize, corners, cv::CALIB_CB_ADAPTIVE_THRESH +
                                                                                   cv::CALIB_CB_NORMALIZE_IMAGE +
                                                                                   cv::CALIB_CB_FAST_CHECK);
-
          cv::Mat rvec,tvec;
+         std::vector<cv::Point2f> puntos;
+         puntos.resize(0);
          if(patternfound){
             cv::cvtColor(frame, GreyFrame, cv::COLOR_RGB2GRAY);
             cv::cornerSubPix(GreyFrame, corners, cv::Size(5, 5), cv::Size(-1,-1), cv::TermCriteria());
-            drawChessboardCorners(frame, patternSize, cv::Mat(corners), patternfound);
-            cv::solvePnP(objectPoints, corners, cameraMatrix, distortionCoefficients, rvec, tvec);
+            cv::solvePnP(cv::Mat(objectPoints), cv::Mat(corners), cameraMatrix, distortionCoefficients, rvec, tvec);
+
+            cv::projectPoints(prueba, rvec, tvec, cameraMatrix, distortionCoefficients, puntos);
+
+            cv::line(frame, puntos[0], puntos[1], cv::Scalar(255, 0, 0), 3);
+            cv::line(frame, puntos[0], puntos[2], cv::Scalar(0, 255, 0), 3);
+            cv::line(frame, puntos[0], puntos[3], cv::Scalar(0, 0, 255), 3);
          }
 
-         cv::imshow("Live", frame);
+         cv::imshow("Augmented Reality", frame);
          if(cv::waitKey(5)>=0){
             break;
          }
