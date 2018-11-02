@@ -12,17 +12,18 @@
 #include <string>
 #include "functions.hpp"
 const cv::String keys =
-   "{help h usage ? |      | print this message                }"
-   "{@rows          |<none>| Rows of the chessboard            }"
-   "{@cols          |<none>| Columns of the chessboard         }"
-   "{@size          |<none>| Size                              }"
-   "{@file          |<none>| yaml file                         }"
-   "{@video         |<none>| The input video                   }"
+   "{help h usage ? |      | print this message                        }"
+   "{@rows          |<none>| Rows of the chessboard                    }"
+   "{@cols          |<none>| Columns of the chessboard                 }"
+   "{@size          |<none>| Size                                      }"
+   "{@file          |<none>| yaml file                                 }"
+   "{@video         |<none>| The input video                           }"
+   "{image i        |      | The image or video to see in the 3d scene }"
    ;
 int main(int argc, char* const* argv){
    int retCode=EXIT_SUCCESS;
 
-   try{
+   // try{
       cv::CommandLineParser parser(argc, argv, keys);
       parser.about("Image equalization");
       if(parser.has("help")){
@@ -34,6 +35,7 @@ int main(int argc, char* const* argv){
       int size=parser.get<int>("@size");
       std::string file=parser.get<std::string>("@file");
       std::string input=parser.get<std::string>("@video");
+      std::string image=parser.get<std::string>("image");
 
       if(!parser.check()){
          parser.printErrors();
@@ -61,12 +63,6 @@ int main(int argc, char* const* argv){
       prueba.push_back(cv::Point3f((rows/2)*size,((cols/2)+1)*size,0));
       prueba.push_back(cv::Point3f((rows/2)*size,(cols/2)*size,-size));
 
-      // prueba.push_back(cv::Point3f(0, 0, 0));
-      // prueba.push_back(cv::Point3f(30, 0, 0));
-      // prueba.push_back(cv::Point3f(0, 30, 0));
-      // prueba.push_back(cv::Point3f(0, 0, -30));
-
-
       while(video.read(frame)){
          std::vector<cv::Point2f> corners;
          cv::Mat a;
@@ -79,7 +75,7 @@ int main(int argc, char* const* argv){
          cv::Mat rvec,tvec;
          std::vector<cv::Point2f> puntos;
          puntos.resize(0);
-         if(patternfound){
+         if(patternfound && image==""){
             cv::cvtColor(frame, GreyFrame, cv::COLOR_RGB2GRAY);
             cv::cornerSubPix(GreyFrame, corners, cv::Size(5, 5), cv::Size(-1,-1), cv::TermCriteria());
             cv::solvePnP(cv::Mat(objectPoints), cv::Mat(corners), cameraMatrix, distortionCoefficients, rvec, tvec);
@@ -90,16 +86,22 @@ int main(int argc, char* const* argv){
             cv::line(frame, puntos[0], puntos[2], cv::Scalar(0, 255, 0), 3);
             cv::line(frame, puntos[0], puntos[3], cv::Scalar(0, 0, 255), 3);
          }
+         else if(patternfound && image!=""){
+            cv::Mat imageMat=cv::imread(image, cv::IMREAD_COLOR);
+            cv::Mat M=cv::getPerspectiveTransform(imageMat, frame.clone());
+
+            cv::warpPerspective(imageMat, frame, M, cv::Size(200, 200));
+         }
 
          cv::imshow("Augmented Reality", frame);
          if(cv::waitKey(5)>=0){
             break;
          }
       }
-   }
-   catch(std::exception& e){
-      std::cerr << "Exception: " << e.what() << std::endl;
-      retCode=EXIT_FAILURE;
-   }
-   return retCode;
+   // }
+   // catch(std::exception& e){
+   //    std::cerr << "Exception: " << e.what() << std::endl;
+   //    retCode=EXIT_FAILURE;
+   // }
+   // return retCode;
 }
