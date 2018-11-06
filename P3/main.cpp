@@ -18,7 +18,6 @@ const cv::String keys =
    "{@size          |<none>| Size                                      }"
    "{@file          |<none>| yaml file                                 }"
    "{@video         |<none>| The input video                           }"
-   "{image i        |      | The image or video to see in the 3d scene }"
    ;
 int main(int argc, char* const* argv){
    int retCode=EXIT_SUCCESS;
@@ -35,7 +34,6 @@ int main(int argc, char* const* argv){
       int size=parser.get<int>("@size");
       std::string file=parser.get<std::string>("@file");
       std::string input=parser.get<std::string>("@video");
-      std::string image=parser.get<std::string>("image");
 
       if(!parser.check()){
          parser.printErrors();
@@ -71,11 +69,6 @@ int main(int argc, char* const* argv){
          video.open(input);
       }
 
-      cv::Mat imageMat;
-      if(image!=""){
-         imageMat=cv::imread(image, CV_LOAD_IMAGE_GRAYSCALE);
-      }
-
       while(video.read(frame)){
          std::vector<cv::Point2f> corners;
          std::vector<cv::Point2f> puntos(0);
@@ -85,7 +78,7 @@ int main(int argc, char* const* argv){
          bool patternfound=cv::findChessboardCorners(frame, patternSize, corners, cv::CALIB_CB_ADAPTIVE_THRESH +
                                                                                   cv::CALIB_CB_NORMALIZE_IMAGE +
                                                                                   cv::CALIB_CB_FAST_CHECK);
-         if(patternfound && image==""){
+         if(patternfound){
             cv::cvtColor(frame, GreyFrame, cv::COLOR_RGB2GRAY);
             cv::cornerSubPix(GreyFrame, corners, cv::Size(5, 5), cv::Size(-1,-1), cv::TermCriteria());
             cv::solvePnP(cv::Mat(objectPoints), cv::Mat(corners), cameraMatrix, distortionCoefficients, rvec, tvec);
@@ -95,16 +88,6 @@ int main(int argc, char* const* argv){
             cv::line(frame, puntos[0], puntos[1], cv::Scalar(255, 0, 0), 3);
             cv::line(frame, puntos[0], puntos[2], cv::Scalar(0, 255, 0), 3);
             cv::line(frame, puntos[0], puntos[3], cv::Scalar(0, 0, 255), 3);
-         }
-         else if(patternfound && image!=""){
-            std::vector<cv::Point2f> a=frame.clone();
-            std::vector<cv::Point2f> b=imageMat;
-            // cv::Mat clone=frame.clone();
-            // clone.convertTo(clone, CV_32F);
-            // imageMat.convertTo(clone, CV_32F);
-            cv::Mat M=cv::getPerspectiveTransform(a, b);
-
-            cv::warpPerspective(imageMat, frame, M, cv::Size(200, 200));
          }
 
          cv::imshow("Augmented Reality", frame);
