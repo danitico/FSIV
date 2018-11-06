@@ -23,7 +23,7 @@ const cv::String keys =
 int main(int argc, char* const* argv){
    int retCode=EXIT_SUCCESS;
 
-   // try{
+   try{
       cv::CommandLineParser parser(argc, argv, keys);
       parser.about("Image equalization");
       if(parser.has("help")){
@@ -43,9 +43,7 @@ int main(int argc, char* const* argv){
          return 0;
       }
 
-      cv::Mat frame;
       cv::FileStorage descriptor(file, cv::FileStorage::READ);
-      cv::VideoCapture video(input);
       cv::Mat cameraMatrix, distortionCoefficients, image_points;
       descriptor["camera_matrix"] >> cameraMatrix;
       descriptor["distortion_coefficients"] >> distortionCoefficients;
@@ -57,38 +55,54 @@ int main(int argc, char* const* argv){
          }
       }
 
-      std::vector<cv::Point3f> prueba;
-      prueba.push_back(cv::Point3f((rows/2)*size,(cols/2)*size,0));
-      prueba.push_back(cv::Point3f(((rows/2)+1)*size,(cols/2)*size,0));
-      prueba.push_back(cv::Point3f((rows/2)*size,((cols/2)+1)*size,0));
-      prueba.push_back(cv::Point3f((rows/2)*size,(cols/2)*size,-size));
+      std::vector<cv::Point3f> puntos3Dlineas;
+      puntos3Dlineas.push_back(cv::Point3f((rows/2)*size,(cols/2)*size,0));
+      puntos3Dlineas.push_back(cv::Point3f(((rows/2)+1)*size,(cols/2)*size,0));
+      puntos3Dlineas.push_back(cv::Point3f((rows/2)*size,((cols/2)+1)*size,0));
+      puntos3Dlineas.push_back(cv::Point3f((rows/2)*size,(cols/2)*size,-size));
+
+      cv::VideoCapture video;
+      cv::Mat frame;
+
+      if(input=="0"){
+         video.open(0);
+      }
+      else{
+         video.open(input);
+      }
+
+      cv::Mat imageMat;
+      if(image!=""){
+         imageMat=cv::imread(image, CV_LOAD_IMAGE_GRAYSCALE);
+      }
 
       while(video.read(frame)){
          std::vector<cv::Point2f> corners;
-         cv::Mat a;
+         std::vector<cv::Point2f> puntos(0);
+         cv::Mat a, GreyFrame, rvec, tvec;
          cv::Size patternSize(rows,cols);
-         cv::Mat GreyFrame;
 
          bool patternfound=cv::findChessboardCorners(frame, patternSize, corners, cv::CALIB_CB_ADAPTIVE_THRESH +
                                                                                   cv::CALIB_CB_NORMALIZE_IMAGE +
                                                                                   cv::CALIB_CB_FAST_CHECK);
-         cv::Mat rvec,tvec;
-         std::vector<cv::Point2f> puntos;
-         puntos.resize(0);
          if(patternfound && image==""){
             cv::cvtColor(frame, GreyFrame, cv::COLOR_RGB2GRAY);
             cv::cornerSubPix(GreyFrame, corners, cv::Size(5, 5), cv::Size(-1,-1), cv::TermCriteria());
             cv::solvePnP(cv::Mat(objectPoints), cv::Mat(corners), cameraMatrix, distortionCoefficients, rvec, tvec);
 
-            cv::projectPoints(prueba, rvec, tvec, cameraMatrix, distortionCoefficients, puntos);
+            cv::projectPoints(puntos3Dlineas, rvec, tvec, cameraMatrix, distortionCoefficients, puntos);
 
             cv::line(frame, puntos[0], puntos[1], cv::Scalar(255, 0, 0), 3);
             cv::line(frame, puntos[0], puntos[2], cv::Scalar(0, 255, 0), 3);
             cv::line(frame, puntos[0], puntos[3], cv::Scalar(0, 0, 255), 3);
          }
          else if(patternfound && image!=""){
-            cv::Mat imageMat=cv::imread(image, cv::IMREAD_COLOR);
-            cv::Mat M=cv::getPerspectiveTransform(imageMat, frame.clone());
+            std::vector<cv::Point2f> a=frame.clone();
+            std::vector<cv::Point2f> b=imageMat;
+            // cv::Mat clone=frame.clone();
+            // clone.convertTo(clone, CV_32F);
+            // imageMat.convertTo(clone, CV_32F);
+            cv::Mat M=cv::getPerspectiveTransform(a, b);
 
             cv::warpPerspective(imageMat, frame, M, cv::Size(200, 200));
          }
@@ -98,10 +112,10 @@ int main(int argc, char* const* argv){
             break;
          }
       }
-   // }
-   // catch(std::exception& e){
-   //    std::cerr << "Exception: " << e.what() << std::endl;
-   //    retCode=EXIT_FAILURE;
-   // }
-   // return retCode;
+   }
+   catch(std::exception& e){
+      std::cerr << "Exception: " << e.what() << std::endl;
+      retCode=EXIT_FAILURE;
+   }
+   return retCode;
 }
