@@ -13,7 +13,7 @@ using namespace std;
 using namespace cv;
 int main (int argc, char * const argv[]){
   /* Default values */
-   bool cameraInput=false;
+   bool cameraInput=true;
    bool useWhitePatchCorrecction=false;
    bool useChromaticCooridnates=false;
    int threshold_value;
@@ -47,7 +47,7 @@ int main (int argc, char * const argv[]){
 
    if(cameraInput){
       input.open(atoi(filein));
-      input1.open(atoi(filein));
+      // input1.open(atoi(filein));
    }
    else{
       input.open(filein);
@@ -55,7 +55,7 @@ int main (int argc, char * const argv[]){
    }
 
 
-   if(!input.isOpened() || !input1.isOpened()){
+   if(!input.isOpened()){
       cerr << "Error: the input stream is not opened.\n";
       abort();
    }
@@ -69,15 +69,16 @@ int main (int argc, char * const argv[]){
       abort();
    }
 
-   double fps=25.0;
-   if(!cameraInput){
-      fps=input.get(CV_CAP_PROP_FPS);
-   }
+   double fps=13.0;
+   // if(!cameraInput){
+      // fps=input.get(CV_CAP_PROP_FPS);
+   // }
 
    Mat outFrame = Mat::zeros(inFrame.size(), CV_8UC1);
 
    VideoWriter output;
-   output.open(fileout, CV_FOURCC('M','J','P','G'), fps, inFrame.size(), 0);
+   // std::cout << inFrame.rows << " " << inFrame.cols << " " << inFrame.channels() << '\n';
+   output.open(fileout, CV_FOURCC('H','2','6','4'), fps, inFrame.size(), 0);
    if(!output.isOpened()){
       cerr << "Error: the ouput stream is not opened.\n";
    }
@@ -87,7 +88,7 @@ int main (int argc, char * const argv[]){
    bool wasOk2=true;
 
    cv::namedWindow("Output");
-   Mat opening, closing;
+   Mat opening, closing, siguiente, gray;
    Mat structureElement=getStructuringElement(MORPH_RECT, Size(3, 3));
    while(wasOk && key!=27){
       frameNumber++;
@@ -95,7 +96,7 @@ int main (int argc, char * const argv[]){
       cv::imshow ("Input", inFrame);
       // prueba=inFrame1-inFrame;
 
-      if(wasOk2){
+      if(wasOk2 && !cameraInput){
          absdiff(inFrame1, inFrame, outFrame);
          threshold(outFrame, outFrame, threshold_value, 0, THRESH_TOZERO);
          opening=outFrame.clone();
@@ -108,8 +109,28 @@ int main (int argc, char * const argv[]){
          outFrame=opening + closing;
          cv::imshow ("Output", outFrame);
       }
+      else if(wasOk2 && cameraInput){
+         wasOk=input.read(siguiente);
+         absdiff(siguiente, inFrame, outFrame);
+         threshold(outFrame, outFrame, threshold_value, 0, THRESH_TOZERO);
+         opening=outFrame.clone();
+         closing=outFrame.clone();
+         erode(opening, opening, structureElement);
+         dilate(opening, opening, structureElement);
+
+         dilate(closing, closing, structureElement);
+         erode(closing, closing, structureElement);
+         outFrame=opening + closing;
+         // std::cout << outFrame.rows << " " << outFrame.cols << " " << outFrame.channels() << '\n';
+         cvtColor(outFrame, gray, COLOR_RGB2GRAY);
+         output.write(gray);
+         cv::imshow ("Output", gray);
+      }
+
       wasOk=input.read(inFrame);
-      wasOk2=input1.read(inFrame1);
+      if(!cameraInput){
+         wasOk2=input1.read(inFrame1);
+      }
       key = cv::waitKey(20);
    }
    return 0;
