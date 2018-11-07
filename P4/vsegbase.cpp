@@ -16,7 +16,7 @@ int main (int argc, char * const argv[]){
    bool cameraInput=false;
    bool useWhitePatchCorrecction=false;
    bool useChromaticCooridnates=false;
-   int threshold;
+   int threshold_value;
    const char * filein = 0;
    const char * fileout = 0;
    char opt;
@@ -38,27 +38,32 @@ int main (int argc, char * const argv[]){
 
    filein = filename.getValue().c_str();
    fileout = outname.getValue().c_str();
+   threshold_value = thres.getValue();
 
    std::cout << "Input stream:" << filein << endl;
    std::cout << "Output:" << fileout << endl;
 
-   VideoCapture input;
+   VideoCapture input, input1;
 
    if(cameraInput){
       input.open(atoi(filein));
+      input1.open(atoi(filein));
    }
    else{
       input.open(filein);
+      input1.open(filein);
    }
 
 
-   if(!input.isOpened()){
+   if(!input.isOpened() || !input1.isOpened()){
       cerr << "Error: the input stream is not opened.\n";
       abort();
    }
 
-   Mat inFrame;
+   Mat inFrame, inFrame1;
    bool wasOk = input.read(inFrame);
+   input1.read(inFrame1);
+   input1.read(inFrame1);
    if(!wasOk){
       cerr << "Error: could not read any image from stream.\n";
       abort();
@@ -79,24 +84,24 @@ int main (int argc, char * const argv[]){
 
    int frameNumber=0;
    int key = 0;
+   bool wasOk2=true;
 
    cv::namedWindow("Output");
-
+   Mat prueba;
    while(wasOk && key!=27){
       frameNumber++;
 
       cv::imshow ("Input", inFrame);
+      // prueba=inFrame1-inFrame;
 
-      // Do your processing
-      // TODO
-
-      outFrame = inFrame; // CHANGE ME!
-
-      cv::imshow ("Output", outFrame);
-
+      if(wasOk2){
+         absdiff(inFrame1, inFrame, outFrame);
+         threshold(outFrame, outFrame, threshold_value, 0, THRESH_TOZERO);
+         cv::imshow ("Output", outFrame);
+      }
       wasOk=input.read(inFrame);
+      wasOk2=input1.read(inFrame1);
       key = cv::waitKey(20);
-
    }
    return 0;
 }
