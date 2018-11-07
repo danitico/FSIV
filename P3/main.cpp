@@ -10,7 +10,6 @@
 #include <exception>
 #include <unistd.h>
 #include <string>
-#include "functions.hpp"
 const cv::String keys =
    "{help h usage ? |      | print this message                        }"
    "{@rows          |<none>| Rows of the chessboard                    }"
@@ -91,7 +90,7 @@ int main(int argc, char* const* argv){
          }
 
          cv::imshow("Augmented Reality", frame);
-         if(cv::waitKey(5)>=0){
+         if(cv::waitKey(5)>=0){//q
             break;
          }
       }

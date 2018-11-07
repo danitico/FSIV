@@ -1,5 +1,6 @@
 P1/build/
 P2/build/
 *.zip
+*tar.xz
 P3/build/
 P4/build/
