@@ -87,7 +87,8 @@ int main (int argc, char * const argv[]){
    bool wasOk2=true;
 
    cv::namedWindow("Output");
-   Mat prueba;
+   Mat opening, closing;
+   Mat structureElement=getStructuringElement(MORPH_RECT, Size(3, 3));
    while(wasOk && key!=27){
       frameNumber++;
 
@@ -97,6 +98,14 @@ int main (int argc, char * const argv[]){
       if(wasOk2){
          absdiff(inFrame1, inFrame, outFrame);
          threshold(outFrame, outFrame, threshold_value, 0, THRESH_TOZERO);
+         opening=outFrame.clone();
+         closing=outFrame.clone();
+         erode(opening, opening, structureElement);
+         dilate(opening, opening, structureElement);
+
+         dilate(closing, closing, structureElement);
+         erode(closing, closing, structureElement);
+         outFrame=opening + closing;
          cv::imshow ("Output", outFrame);
       }
       wasOk=input.read(inFrame);
