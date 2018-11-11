@@ -11,10 +11,15 @@
 #include <opencv2/video/video.hpp>
 using namespace std;
 using namespace cv;
-static void on_trackbar(int, void*);
+struct data{
+   VideoWriter input;
+   double value;
+};
+static void on_trackbar(int threshold_value, void* ptr);
+static void on_trackbar_1(int gain, void* ptr);
 int main (int argc, char * const argv[]){
   /* Default values */
-   bool cameraInput=false;
+   bool cameraInput=true;
    bool useWhitePatchCorrecction=false;
    bool useChromaticCooridnates=false;
    int sizeSE_value, threshold_value;
@@ -95,6 +100,13 @@ int main (int argc, char * const argv[]){
    cv::namedWindow("Output with Color");
    createTrackbar("Threshold Value", "Output", &threshold_value, 255, on_trackbar, (void*)&outFrame);
 
+   struct data datos_camara;
+   if(cameraInput){
+      datos_camara.value = input.get(CAP_PROP_BRIGHTNESS);
+      std::cout << datos_camara.value << std::endl;
+      createTrackbar("Brightness", "Output", (int*)&(datos_camara.value), 255, on_trackbar_1, (void*)&datos_camara);
+   }
+
    Mat opening, closing, siguiente, gray, structureElement;
    if(sizeSE_value!=0){
       structureElement=getStructuringElement(MORPH_RECT, Size(sizeSE_value, sizeSE_value));
@@ -115,34 +127,38 @@ int main (int argc, char * const argv[]){
             outFrame=opening + closing;
          }
 
-         if(cv::waitKey(20)==32){
+         if(cv::waitKey(20)==' '){
             cv::imwrite("out_" + to_string(frameNumber) + ".png", outFrame);
          }
 
          cv::imshow("Output with Color", outFrame);
          cvtColor(outFrame, gray, COLOR_RGB2GRAY);
-         threshold(gray.clone(), gray, 100, 255, THRESH_BINARY);
+         // threshold(gray.clone(), gray, 100, 255, THRESH_BINARY);
          output.write(gray);
          cv::imshow ("Output", gray);
       }
-      // else if(wasOk2 && cameraInput){
-      //    wasOk=input.read(siguiente);
-      //
-      //    absdiff(siguiente, inFrame, outFrame);
-      //    threshold(outFrame, outFrame, threshold_value, 0, THRESH_TOZERO);
-      //    opening=outFrame.clone(); closing=outFrame.clone();
-      //
-      //    erode(opening, opening, structureElement);
-      //    dilate(opening, opening, structureElement);
-      //    dilate(closing, closing, structureElement);
-      //    erode(closing, closing, structureElement);
-      //
-      //    outFrame=opening + closing;
-      //
-      //    cvtColor(outFrame, gray, COLOR_RGB2GRAY);
-      //    output.write(gray);
-      //    cv::imshow ("Output", gray);
-      // }
+      else if(wasOk2 && cameraInput){
+         wasOk=input.read(siguiente);
+         absdiff(siguiente, inFrame, outFrame);
+         on_trackbar(threshold_value, (void*)&outFrame);
+         on_trackbar_1(datos_camara.value, (void*)&datos_camara);
+
+         if(sizeSE_value!=0){
+            morphologyEx(outFrame.clone(), opening, MORPH_OPEN, structureElement);
+            morphologyEx(outFrame.clone(), closing, MORPH_CLOSE, structureElement);
+            outFrame=opening + closing;
+         }
+
+         if(cv::waitKey(5)==' '){
+            cv::imwrite("out_" + to_string(frameNumber) + ".png", outFrame);
+         }
+
+         cv::imshow("Output with Color", outFrame);
+         cvtColor(outFrame, gray, COLOR_RGB2GRAY);
+         // threshold(gray.clone(), gray, 100, 255, THRESH_BINARY);
+         output.write(gray);
+         cv::imshow ("Output", gray);
+      }
 
       wasOk=input.read(inFrame);
       if(!cameraInput){
@@ -155,4 +171,10 @@ int main (int argc, char * const argv[]){
 static void on_trackbar(int threshold_value, void* ptr){
    Mat *outFrame = (Mat*)ptr;
    threshold(outFrame->clone(), *outFrame, threshold_value, 0, THRESH_TOZERO);
+}
+static void on_trackbar_1(int gain, void* ptr){
+   struct data *datos = (struct data*)ptr;
+   std::cout << gain << '\n';
+   datos->input.set(CAP_PROP_BRIGHTNESS, gain);
+   // std::cout << datos->input.get(CAP_PROP_BRIGHTNESS) << std::endl;
 }
