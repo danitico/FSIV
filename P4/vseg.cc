@@ -33,7 +33,7 @@ int main (int argc, char * const argv[]){
    TCLAP::ValueArg<int> thres("t", "threshold", "Threshold value", false, 13, "int");
    cmd.add(thres);
 
-   TCLAP::ValueArg<int> sizeSE("s", "size", "Size of the structure Element", false, 3, "int");
+   TCLAP::ValueArg<int> sizeSE("s", "size", "Size of the structure Element", false, 0, "int");
    cmd.add(sizeSE);
 
    // Parse input arguments
@@ -91,8 +91,10 @@ int main (int argc, char * const argv[]){
    bool wasOk2=true;
 
    cv::namedWindow("Output");
-   Mat opening, closing, siguiente, gray;
-   Mat structureElement=getStructuringElement(MORPH_RECT, Size(sizeSE_value, sizeSE_value));
+   Mat opening, closing, siguiente, gray, structureElement;
+   if(sizeSE_value!=0){
+      structureElement=getStructuringElement(MORPH_RECT, Size(sizeSE_value, sizeSE_value));
+   }
 
    while(wasOk && key!=27){
       frameNumber++;
@@ -101,39 +103,35 @@ int main (int argc, char * const argv[]){
 
       if(wasOk2 && !cameraInput){
          absdiff(inFrame1, inFrame, outFrame);
-         threshold(outFrame, outFrame, threshold_value, 0, THRESH_TOZERO);
+         threshold(outFrame.clone(), outFrame, threshold_value, 0, THRESH_TOZERO);
 
-         morphologyEx(outFrame.clone(), opening, MORPH_OPEN, structureElement);
-         morphologyEx(outFrame.clone(), closing, MORPH_CLOSE, structureElement);
-         // erode(opening, opening, structureElement);
-         // dilate(opening, opening, structureElement);
-         // dilate(closing, closing, structureElement);
-         // erode(closing, closing, structureElement);
+         if(sizeSE_value!=0){
+            morphologyEx(outFrame.clone(), opening, MORPH_OPEN, structureElement);
+            morphologyEx(outFrame.clone(), closing, MORPH_CLOSE, structureElement);
+            outFrame=opening + closing;
+         }
 
-         outFrame=opening + closing;
-
-         // cvtColor(outFrame, gray, COLOR_RGB2GRAY);
          output.write(outFrame);
          cv::imshow ("Output", outFrame);
       }
-      else if(wasOk2 && cameraInput){
-         wasOk=input.read(siguiente);
-
-         absdiff(siguiente, inFrame, outFrame);
-         threshold(outFrame, outFrame, threshold_value, 0, THRESH_TOZERO);
-         opening=outFrame.clone(); closing=outFrame.clone();
-
-         erode(opening, opening, structureElement);
-         dilate(opening, opening, structureElement);
-         dilate(closing, closing, structureElement);
-         erode(closing, closing, structureElement);
-
-         outFrame=opening + closing;
-
-         cvtColor(outFrame, gray, COLOR_RGB2GRAY);
-         output.write(gray);
-         cv::imshow ("Output", gray);
-      }
+      // else if(wasOk2 && cameraInput){
+      //    wasOk=input.read(siguiente);
+      //
+      //    absdiff(siguiente, inFrame, outFrame);
+      //    threshold(outFrame, outFrame, threshold_value, 0, THRESH_TOZERO);
+      //    opening=outFrame.clone(); closing=outFrame.clone();
+      //
+      //    erode(opening, opening, structureElement);
+      //    dilate(opening, opening, structureElement);
+      //    dilate(closing, closing, structureElement);
+      //    erode(closing, closing, structureElement);
+      //
+      //    outFrame=opening + closing;
+      //
+      //    cvtColor(outFrame, gray, COLOR_RGB2GRAY);
+      //    output.write(gray);
+      //    cv::imshow ("Output", gray);
+      // }
 
       wasOk=input.read(inFrame);
       if(!cameraInput){
