@@ -11,12 +11,13 @@
 #include <opencv2/video/video.hpp>
 using namespace std;
 using namespace cv;
+static void on_trackbar(int, void*);
 int main (int argc, char * const argv[]){
   /* Default values */
    bool cameraInput=false;
    bool useWhitePatchCorrecction=false;
    bool useChromaticCooridnates=false;
-   int threshold_value, sizeSE_value;
+   int sizeSE_value, threshold_value;
    const char * filein = 0;
    const char * fileout = 0;
    char opt;
@@ -91,6 +92,8 @@ int main (int argc, char * const argv[]){
    bool wasOk2=true;
 
    cv::namedWindow("Output");
+   createTrackbar("Threshold Value", "Output", &threshold_value, 255, on_trackbar, (void*)&outFrame);
+
    Mat opening, closing, siguiente, gray, structureElement;
    if(sizeSE_value!=0){
       structureElement=getStructuringElement(MORPH_RECT, Size(sizeSE_value, sizeSE_value));
@@ -103,7 +106,7 @@ int main (int argc, char * const argv[]){
 
       if(wasOk2 && !cameraInput){
          absdiff(inFrame1, inFrame, outFrame);
-         threshold(outFrame.clone(), outFrame, threshold_value, 0, THRESH_TOZERO);
+         on_trackbar(threshold_value, (void*)&outFrame);
 
          if(sizeSE_value!=0){
             morphologyEx(outFrame.clone(), opening, MORPH_OPEN, structureElement);
@@ -140,4 +143,8 @@ int main (int argc, char * const argv[]){
       key = cv::waitKey(20);
    }
    return 0;
+}
+static void on_trackbar(int threshold_value, void* ptr){
+   Mat *outFrame = (Mat*)ptr;
+   threshold(outFrame->clone(), *outFrame, threshold_value, 0, THRESH_TOZERO);
 }
