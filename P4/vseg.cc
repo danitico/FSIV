@@ -73,7 +73,7 @@ int main (int argc, char * const argv[]){
       abort();
    }
 
-   double fps=13.0;
+   double fps=25.0;
    if(!cameraInput){
       fps=input.get(CV_CAP_PROP_FPS);
    }
@@ -82,7 +82,7 @@ int main (int argc, char * const argv[]){
 
    VideoWriter output;
    // std::cout << inFrame.rows << " " << inFrame.cols << " " << inFrame.channels() << '\n';
-   output.open(fileout, CV_FOURCC('H','2','6','4'), fps, inFrame.size(), 1);
+   output.open(fileout, CV_FOURCC('H','2','6','4'), fps, inFrame.size(), 0);
    if(!output.isOpened()){
       cerr << "Error: the ouput stream is not opened.\n";
    }
@@ -92,6 +92,7 @@ int main (int argc, char * const argv[]){
    bool wasOk2=true;
 
    cv::namedWindow("Output");
+   cv::namedWindow("Output with Color");
    createTrackbar("Threshold Value", "Output", &threshold_value, 255, on_trackbar, (void*)&outFrame);
 
    Mat opening, closing, siguiente, gray, structureElement;
@@ -114,8 +115,15 @@ int main (int argc, char * const argv[]){
             outFrame=opening + closing;
          }
 
-         output.write(outFrame);
-         cv::imshow ("Output", outFrame);
+         if(cv::waitKey(20)==32){
+            cv::imwrite("out_" + to_string(frameNumber) + ".png", outFrame);
+         }
+
+         cv::imshow("Output with Color", outFrame);
+         cvtColor(outFrame, gray, COLOR_RGB2GRAY);
+         threshold(gray.clone(), gray, 100, 255, THRESH_BINARY);
+         output.write(gray);
+         cv::imshow ("Output", gray);
       }
       // else if(wasOk2 && cameraInput){
       //    wasOk=input.read(siguiente);
