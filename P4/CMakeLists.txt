@@ -6,5 +6,4 @@ find_package(OpenCV 3.3 REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR}/tclap-1.2.1/include ${OpenCV_INCLUDE_DIRS})
 LINK_LIBRARIES(${OpenCV_LIBS})
 
-add_executable(vsegbase vsegbase.cpp)
-
+add_executable(vseg vseg.cc)

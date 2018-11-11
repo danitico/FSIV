@@ -13,10 +13,10 @@ using namespace std;
 using namespace cv;
 int main (int argc, char * const argv[]){
   /* Default values */
-   bool cameraInput=true;
+   bool cameraInput=false;
    bool useWhitePatchCorrecction=false;
    bool useChromaticCooridnates=false;
-   int threshold_value;
+   int threshold_value, sizeSE_value;
    const char * filein = 0;
    const char * fileout = 0;
    char opt;
@@ -33,12 +33,16 @@ int main (int argc, char * const argv[]){
    TCLAP::ValueArg<int> thres("t", "threshold", "Threshold value", false, 13, "int");
    cmd.add(thres);
 
+   TCLAP::ValueArg<int> sizeSE("s", "size", "Size of the structure Element", false, 3, "int");
+   cmd.add(sizeSE);
+
    // Parse input arguments
    cmd.parse(argc, argv);
 
    filein = filename.getValue().c_str();
    fileout = outname.getValue().c_str();
    threshold_value = thres.getValue();
+   sizeSE_value = sizeSE.getValue();
 
    std::cout << "Input stream:" << filein << endl;
    std::cout << "Output:" << fileout << endl;
@@ -47,7 +51,6 @@ int main (int argc, char * const argv[]){
 
    if(cameraInput){
       input.open(atoi(filein));
-      // input1.open(atoi(filein));
    }
    else{
       input.open(filein);
@@ -70,15 +73,15 @@ int main (int argc, char * const argv[]){
    }
 
    double fps=13.0;
-   // if(!cameraInput){
-      // fps=input.get(CV_CAP_PROP_FPS);
-   // }
+   if(!cameraInput){
+      fps=input.get(CV_CAP_PROP_FPS);
+   }
 
    Mat outFrame = Mat::zeros(inFrame.size(), CV_8UC1);
 
    VideoWriter output;
    // std::cout << inFrame.rows << " " << inFrame.cols << " " << inFrame.channels() << '\n';
-   output.open(fileout, CV_FOURCC('H','2','6','4'), fps, inFrame.size(), 0);
+   output.open(fileout, CV_FOURCC('H','2','6','4'), fps, inFrame.size(), 1);
    if(!output.isOpened()){
       cerr << "Error: the ouput stream is not opened.\n";
    }
@@ -89,39 +92,44 @@ int main (int argc, char * const argv[]){
 
    cv::namedWindow("Output");
    Mat opening, closing, siguiente, gray;
-   Mat structureElement=getStructuringElement(MORPH_RECT, Size(3, 3));
+   Mat structureElement=getStructuringElement(MORPH_RECT, Size(sizeSE_value, sizeSE_value));
+
    while(wasOk && key!=27){
       frameNumber++;
 
       cv::imshow ("Input", inFrame);
-      // prueba=inFrame1-inFrame;
 
       if(wasOk2 && !cameraInput){
          absdiff(inFrame1, inFrame, outFrame);
          threshold(outFrame, outFrame, threshold_value, 0, THRESH_TOZERO);
-         opening=outFrame.clone();
-         closing=outFrame.clone();
-         erode(opening, opening, structureElement);
-         dilate(opening, opening, structureElement);
 
-         dilate(closing, closing, structureElement);
-         erode(closing, closing, structureElement);
+         morphologyEx(outFrame.clone(), opening, MORPH_OPEN, structureElement);
+         morphologyEx(outFrame.clone(), closing, MORPH_CLOSE, structureElement);
+         // erode(opening, opening, structureElement);
+         // dilate(opening, opening, structureElement);
+         // dilate(closing, closing, structureElement);
+         // erode(closing, closing, structureElement);
+
          outFrame=opening + closing;
+
+         // cvtColor(outFrame, gray, COLOR_RGB2GRAY);
+         output.write(outFrame);
          cv::imshow ("Output", outFrame);
       }
       else if(wasOk2 && cameraInput){
          wasOk=input.read(siguiente);
+
          absdiff(siguiente, inFrame, outFrame);
          threshold(outFrame, outFrame, threshold_value, 0, THRESH_TOZERO);
-         opening=outFrame.clone();
-         closing=outFrame.clone();
+         opening=outFrame.clone(); closing=outFrame.clone();
+
          erode(opening, opening, structureElement);
          dilate(opening, opening, structureElement);
-
          dilate(closing, closing, structureElement);
          erode(closing, closing, structureElement);
+
          outFrame=opening + closing;
-         // std::cout << outFrame.rows << " " << outFrame.cols << " " << outFrame.channels() << '\n';
+
          cvtColor(outFrame, gray, COLOR_RGB2GRAY);
          output.write(gray);
          cv::imshow ("Output", gray);
