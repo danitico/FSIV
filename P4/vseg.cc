@@ -11,18 +11,16 @@
 #include <opencv2/video/video.hpp>
 using namespace std;
 using namespace cv;
-struct data{
-   VideoWriter input;
-   double value;
-};
 static void on_trackbar(int threshold_value, void* ptr);
-static void on_trackbar_1(int gain, void* ptr);
+static void on_trackbar_1(int brightness, void* ptr);
+static void on_trackbar_2(int contrast, void* ptr);
+static void on_trackbar_3(int saturation, void* ptr);
 int main (int argc, char * const argv[]){
   /* Default values */
    bool cameraInput=true;
    bool useWhitePatchCorrecction=false;
    bool useChromaticCooridnates=false;
-   int sizeSE_value, threshold_value;
+   int sizeSE_value, threshold_value, brightness, contrast, saturation;
    const char * filein = 0;
    const char * fileout = 0;
    char opt;
@@ -96,15 +94,21 @@ int main (int argc, char * const argv[]){
    int key = 0;
    bool wasOk2=true;
 
+   cv::namedWindow("Input");
    cv::namedWindow("Output");
    cv::namedWindow("Output with Color");
    createTrackbar("Threshold Value", "Output", &threshold_value, 255, on_trackbar, (void*)&outFrame);
 
-   struct data datos_camara;
    if(cameraInput){
-      datos_camara.value = input.get(CAP_PROP_BRIGHTNESS);
-      std::cout << datos_camara.value << std::endl;
-      createTrackbar("Brightness", "Output", (int*)&(datos_camara.value), 255, on_trackbar_1, (void*)&datos_camara);
+      brightness = 64;
+      contrast = 32;
+      saturation = 64;
+      createTrackbar("Brightness", "Input", &brightness, 128, on_trackbar_1, (void*)&input);
+      on_trackbar_1(brightness, (void*)&input);
+      createTrackbar("Contrast", "Input", &contrast, 64, on_trackbar_2, (void*)&input);
+      on_trackbar_2(contrast, (void*)&input);
+      createTrackbar("Saturation", "Input", &saturation, 128, on_trackbar_3, (void*)&input);
+      on_trackbar_3(saturation, (void*)&input);
    }
 
    Mat opening, closing, siguiente, gray, structureElement;
@@ -141,7 +145,6 @@ int main (int argc, char * const argv[]){
          wasOk=input.read(siguiente);
          absdiff(siguiente, inFrame, outFrame);
          on_trackbar(threshold_value, (void*)&outFrame);
-         on_trackbar_1(datos_camara.value, (void*)&datos_camara);
 
          if(sizeSE_value!=0){
             morphologyEx(outFrame.clone(), opening, MORPH_OPEN, structureElement);
@@ -172,9 +175,15 @@ static void on_trackbar(int threshold_value, void* ptr){
    Mat *outFrame = (Mat*)ptr;
    threshold(outFrame->clone(), *outFrame, threshold_value, 0, THRESH_TOZERO);
 }
-static void on_trackbar_1(int gain, void* ptr){
-   struct data *datos = (struct data*)ptr;
-   std::cout << gain << '\n';
-   datos->input.set(CAP_PROP_BRIGHTNESS, gain);
-   // std::cout << datos->input.get(CAP_PROP_BRIGHTNESS) << std::endl;
+static void on_trackbar_1(int brightness, void* ptr){
+   VideoCapture *input = (VideoCapture*)ptr;
+   input->set(CAP_PROP_BRIGHTNESS, brightness - 64);
+}
+static void on_trackbar_2(int contrast, void* ptr){
+   VideoCapture *input = (VideoCapture*)ptr;
+   input->set(CAP_PROP_CONTRAST, contrast);
+}
+static void on_trackbar_3(int saturation, void* ptr){
+   VideoCapture *input = (VideoCapture*)ptr;
+   input->set(CAP_PROP_SATURATION, saturation);
 }
