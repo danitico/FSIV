@@ -15,12 +15,14 @@ static void on_trackbar(int threshold_value, void* ptr);
 static void on_trackbar_1(int brightness, void* ptr);
 static void on_trackbar_2(int contrast, void* ptr);
 static void on_trackbar_3(int saturation, void* ptr);
+static void on_trackbar_4(int hue, void* ptr);
+static void on_trackbar_5(int gain, void* ptr);
 int main (int argc, char * const argv[]){
   /* Default values */
    bool cameraInput=true;
    bool useWhitePatchCorrecction=false;
    bool useChromaticCooridnates=false;
-   int sizeSE_value, threshold_value, brightness, contrast, saturation;
+   int sizeSE_value, threshold_value, brightness, contrast, saturation, hue, gain;
    const char * filein = 0;
    const char * fileout = 0;
    char opt;
@@ -100,15 +102,19 @@ int main (int argc, char * const argv[]){
    createTrackbar("Threshold Value", "Output", &threshold_value, 255, on_trackbar, (void*)&outFrame);
 
    if(cameraInput){
-      brightness = 64;
+      brightness = saturation = gain = 64;
       contrast = 32;
-      saturation = 64;
+      hue = 180;
       createTrackbar("Brightness", "Input", &brightness, 128, on_trackbar_1, (void*)&input);
       on_trackbar_1(brightness, (void*)&input);
       createTrackbar("Contrast", "Input", &contrast, 64, on_trackbar_2, (void*)&input);
       on_trackbar_2(contrast, (void*)&input);
       createTrackbar("Saturation", "Input", &saturation, 128, on_trackbar_3, (void*)&input);
       on_trackbar_3(saturation, (void*)&input);
+      createTrackbar("Hue", "Input", &hue, 360, on_trackbar_4, (void*)&input);
+      on_trackbar_4(hue, (void*)&input);
+      createTrackbar("Gain", "Input", &gain, 128, on_trackbar_5, (void*)&input);
+      on_trackbar_5(gain, (void*)&input);
    }
 
    Mat opening, closing, siguiente, gray, structureElement;
@@ -176,14 +182,27 @@ static void on_trackbar(int threshold_value, void* ptr){
    threshold(outFrame->clone(), *outFrame, threshold_value, 0, THRESH_TOZERO);
 }
 static void on_trackbar_1(int brightness, void* ptr){
+   double value = (double)brightness;
    VideoCapture *input = (VideoCapture*)ptr;
-   input->set(CAP_PROP_BRIGHTNESS, brightness - 64);
+   input->set(CAP_PROP_BRIGHTNESS, value/128.0);
 }
 static void on_trackbar_2(int contrast, void* ptr){
+   double value = (double)contrast;
    VideoCapture *input = (VideoCapture*)ptr;
-   input->set(CAP_PROP_CONTRAST, contrast);
+   input->set(CAP_PROP_CONTRAST, value/64.0);
 }
 static void on_trackbar_3(int saturation, void* ptr){
+   double value = (double)saturation;
    VideoCapture *input = (VideoCapture*)ptr;
-   input->set(CAP_PROP_SATURATION, saturation);
+   input->set(CAP_PROP_SATURATION, value/128.0);
+}
+static void on_trackbar_4(int hue, void* ptr){
+   double value = (double)hue;
+   VideoCapture *input = (VideoCapture*)ptr;
+   input->set(CAP_PROP_HUE, value/360.0);
+}
+static void on_trackbar_5(int gain, void* ptr){
+   double value = (double)gain;
+   VideoCapture *input = (VideoCapture*)ptr;
+   input->set(CAP_PROP_GAIN, value/128.0);
 }
