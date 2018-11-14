@@ -19,7 +19,7 @@ static void on_trackbar_4(int hue, void* ptr);
 static void on_trackbar_5(int gain, void* ptr);
 int main (int argc, char * const argv[]){
   /* Default values */
-   bool cameraInput=true;
+   bool cameraInput=false;
    bool useWhitePatchCorrecction=false;
    bool useChromaticCooridnates=false;
    int sizeSE_value, threshold_value, brightness, contrast, saturation, hue, gain;
@@ -87,7 +87,7 @@ int main (int argc, char * const argv[]){
 
    VideoWriter output;
    // std::cout << inFrame.rows << " " << inFrame.cols << " " << inFrame.channels() << '\n';
-   output.open(fileout, CV_FOURCC('H','2','6','4'), fps, inFrame.size(), 0);
+   output.open(fileout, CV_FOURCC('M','P','E','G'), fps, inFrame.size(), 0);
    if(!output.isOpened()){
       cerr << "Error: the ouput stream is not opened.\n";
    }
@@ -127,44 +127,30 @@ int main (int argc, char * const argv[]){
 
       cv::imshow ("Input", inFrame);
 
-      if(wasOk2 && !cameraInput){
-         absdiff(inFrame1, inFrame, outFrame);
+      if(wasOk2){
+         if(!cameraInput){
+            absdiff(inFrame1, inFrame, outFrame);
+         }
+         else{
+            wasOk=input.read(siguiente);
+            absdiff(siguiente, inFrame, outFrame);
+         }
          on_trackbar(threshold_value, (void*)&outFrame);
-
-         if(sizeSE_value!=0){
-            morphologyEx(outFrame.clone(), opening, MORPH_OPEN, structureElement);
-            morphologyEx(outFrame.clone(), closing, MORPH_CLOSE, structureElement);
-            outFrame=opening + closing;
-         }
-
-         if(cv::waitKey(20)==' '){
-            cv::imwrite("out_" + to_string(frameNumber) + ".png", outFrame);
-         }
-
-         cv::imshow("Output with Color", outFrame);
-         cvtColor(outFrame, gray, COLOR_RGB2GRAY);
-         // threshold(gray.clone(), gray, 100, 255, THRESH_BINARY);
-         output.write(gray);
-         cv::imshow ("Output", gray);
-      }
-      else if(wasOk2 && cameraInput){
-         wasOk=input.read(siguiente);
-         absdiff(siguiente, inFrame, outFrame);
-         on_trackbar(threshold_value, (void*)&outFrame);
-
-         if(sizeSE_value!=0){
-            morphologyEx(outFrame.clone(), opening, MORPH_OPEN, structureElement);
-            morphologyEx(outFrame.clone(), closing, MORPH_CLOSE, structureElement);
-            outFrame=opening + closing;
-         }
 
          if(cv::waitKey(5)==' '){
             cv::imwrite("out_" + to_string(frameNumber) + ".png", outFrame);
          }
-
          cv::imshow("Output with Color", outFrame);
+
          cvtColor(outFrame, gray, COLOR_RGB2GRAY);
-         // threshold(gray.clone(), gray, 100, 255, THRESH_BINARY);
+
+         if(sizeSE_value!=0){
+            morphologyEx(gray.clone(), opening, MORPH_OPEN, structureElement);
+            morphologyEx(gray.clone(), closing, MORPH_CLOSE, structureElement);
+            gray=opening + closing;
+         }
+
+         threshold(gray.clone(), gray, 100, 255, THRESH_BINARY);
          output.write(gray);
          cv::imshow ("Output", gray);
       }
