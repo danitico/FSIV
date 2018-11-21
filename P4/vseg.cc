@@ -19,7 +19,7 @@ static void on_trackbar_4(int hue, void* ptr);
 static void on_trackbar_5(int gain, void* ptr);
 int main (int argc, char * const argv[]){
   /* Default values */
-   bool cameraInput=false;
+   bool cameraInput=true;
    bool useWhitePatchCorrecction=false;
    bool useChromaticCooridnates=false;
    int sizeSE_value, threshold_value, brightness, contrast, saturation, hue, gain;
