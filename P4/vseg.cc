@@ -18,10 +18,7 @@ static void on_trackbar_3(int saturation, void* ptr);
 static void on_trackbar_4(int hue, void* ptr);
 static void on_trackbar_5(int gain, void* ptr);
 int main (int argc, char * const argv[]){
-  /* Default values */
-   bool cameraInput=true;
-   bool useWhitePatchCorrecction=false;
-   bool useChromaticCooridnates=false;
+   bool cameraInput;
    int sizeSE_value, threshold_value, brightness, contrast, saturation, hue, gain;
    const char * filein = 0;
    const char * fileout = 0;
@@ -42,6 +39,9 @@ int main (int argc, char * const argv[]){
    TCLAP::ValueArg<int> sizeSE("s", "size", "Size of the structure Element", false, 0, "int");
    cmd.add(sizeSE);
 
+   TCLAP::ValueArg<bool> cameraFlag("c", "camera", "Activate the camera", false, false, "bool");
+   cmd.add(cameraFlag);
+
    // Parse input arguments
    cmd.parse(argc, argv);
 
@@ -49,6 +49,7 @@ int main (int argc, char * const argv[]){
    fileout = outname.getValue().c_str();
    threshold_value = thres.getValue();
    sizeSE_value = sizeSE.getValue();
+   cameraInput = cameraFlag.getValue();
 
    std::cout << "Input stream:" << filein << endl;
    std::cout << "Output:" << fileout << endl;
@@ -150,7 +151,7 @@ int main (int argc, char * const argv[]){
             gray=opening + closing;
          }
 
-         threshold(gray.clone(), gray, 100, 255, THRESH_BINARY);
+         threshold(gray.clone(), gray, threshold_value, 255, THRESH_BINARY);
          output.write(gray);
          cv::imshow ("Output", gray);
       }
