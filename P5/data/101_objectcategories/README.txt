@@ -1,0 +1,1 @@
+*** Place the directories with the image categories here ***
