@@ -2,7 +2,6 @@
     \brief Useful for building a Bag of Visual Words model
     \authors Fundamentos de Sistemas Inteligentes en Vision
 */
-
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -12,66 +11,58 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d.hpp>
-
 void basename(const std::string& path,
                      std::string& dirname,
                      std::string& filename,
                      std::string& ext)
 {
-    dirname="";
-    filename=path;
-    ext="";
+   dirname="";
+   filename=path;
+   ext="";
 
-    auto pos = path.rfind("/");
+   auto pos = path.rfind("/");
 
-    if (pos != std::string::npos)
-    {
+   if(pos != std::string::npos){
       dirname=path.substr(0, pos);
       filename=path.substr(pos+1);
-    }
+   }
 
-    pos = filename.rfind(".");
+   pos = filename.rfind(".");
 
-    if (pos != std::string::npos)
-    {
+   if(pos != std::string::npos){
       ext = filename.substr(pos+1);
       filename = filename.substr(0,pos);
-    }
-    return;
+   }
 }
 
-std::string compute_sample_filename(const std::string& basename, const std::string& cat, const int sample_index)
-{
-    std::ostringstream filename;
-    filename << basename << "/101_ObjectCategories/" << cat << "/image_" << std::setfill('0') << std::setw(4) << sample_index << ".jpg";
-    return filename.str();
+std::string compute_sample_filename(const std::string& basename, const std::string& cat, const int sample_index){
+   std::ostringstream filename;
+   filename << basename << "/101_ObjectCategories/" << cat << "/image_" << std::setfill('0') << std::setw(4) << sample_index << ".jpg";
+   return filename.str();
 }
 
-int load_dataset_information(const std::string& fname, std::vector<std::string>& categories, std::vector<int>& samples_per_cat)
-{
+int load_dataset_information(const std::string& fname, std::vector<std::string>& categories, std::vector<int>& samples_per_cat){
    int retCode = 0;
    std::ifstream in (fname);
 
-   if (!in)
-       retCode = 1;
-   else
-   {
-       while((in) && (retCode==0) )
-       {
-           std::string catName;
-           int nsamples;
-           in >> catName >> nsamples;
-           if (!in)
-           {
-               if (! in.eof())
-                retCode = 2;
-           }
-           else
-           {
-               categories.push_back(catName);
-               samples_per_cat.push_back(nsamples);
-           }
-       }
+   if(!in){
+      retCode = 1;
+   }
+   else{
+      while((in) && (retCode==0)){
+         std::string catName;
+         int nsamples;
+         in >> catName >> nsamples;
+         if(!in){
+            if(!in.eof()){
+               retCode = 2;
+            }
+         }
+         else{
+            categories.push_back(catName);
+            samples_per_cat.push_back(nsamples);
+         }
+      }
    }
    return retCode;
 }
@@ -80,27 +71,27 @@ void random_sampling (int total, int ntrain, int ntest,
                       std::vector< int >& train_samples,
                       std::vector< int >& test_samples)
 {
-    assert(ntrain<total);
-    train_samples.resize(0);
-    test_samples.resize(0);
-    std::vector<bool> sampled(total, false);
-    while (ntrain>0)
-    {
-        int s = int(double(total) * rand()/(RAND_MAX+1.0));
-        int i=0;
-        while(sampled[i] && i<sampled.size()) ++i; //the first unsampled.
-        int c=0;
-        while (c<s) //count s unsampled.
-        {
-            while (sampled[++i]); //advance to next unsampled.
-            ++c;
-        }
-        assert(!sampled[i]);
-        train_samples.push_back(i+1);
-        sampled[i]=true;
-        --total;
-        --ntrain;
-    }
+   assert(ntrain<total);
+   train_samples.resize(0);
+   test_samples.resize(0);
+   std::vector<bool> sampled(total, false);
+   while(ntrain>0){
+      int s = int(double(total) * rand()/(RAND_MAX+1.0));
+      int i=0;
+      while(sampled[i] && i<sampled.size()){
+         ++i; //the first unsampled.
+      }
+      int c=0;
+      while (c<s){ //count s unsampled.
+         while (sampled[++i]); //advance to next unsampled.
+         ++c;
+      }
+     assert(!sampled[i]);
+     train_samples.push_back(i+1);
+     sampled[i]=true;
+     --total;
+     --ntrain;
+   }
     if (ntest>=total)
     {
         for (size_t i=0 ; i<sampled.size(); ++i)
@@ -198,4 +189,3 @@ compute_bovw (const cv::Ptr<cv::ml::KNearest>& dict, const int dict_size, cv::Ma
         bovw /= float(img_descs.rows);
     return bovw;
 }
-
