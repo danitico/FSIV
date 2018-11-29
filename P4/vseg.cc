@@ -98,9 +98,8 @@ int main (int argc, char * const argv[]){
    bool wasOk2=true;
 
    cv::namedWindow("Input");
-   cv::namedWindow("Output");
    cv::namedWindow("Output with Color");
-   createTrackbar("Threshold Value", "Output", &threshold_value, 255, on_trackbar, (void*)&outFrame);
+   createTrackbar("Threshold Value", "Output with Color", &threshold_value, 255, on_trackbar, (void*)&outFrame);
 
    if(cameraInput){
       brightness = saturation = gain = 64;
@@ -120,7 +119,7 @@ int main (int argc, char * const argv[]){
 
    Mat opening, closing, siguiente, gray, structureElement;
    if(sizeSE_value!=0){
-      structureElement=getStructuringElement(MORPH_RECT, Size(sizeSE_value, sizeSE_value));
+      structureElement=getStructuringElement(MORPH_RECT, Size(2*sizeSE_value+1, 2*sizeSE_value+1));
    }
 
    while(wasOk && key!=27){
@@ -136,24 +135,28 @@ int main (int argc, char * const argv[]){
             wasOk=input.read(siguiente);
             absdiff(siguiente, inFrame, outFrame);
          }
-         on_trackbar(threshold_value, (void*)&outFrame);
+         cvtColor(outFrame, gray, COLOR_RGB2GRAY);
+
+         cv::Mat mask=gray.clone();
+         on_trackbar(threshold_value, (void*)&mask);
+
+         if(sizeSE_value!=0){
+            morphologyEx(mask.clone(), opening, MORPH_OPEN, structureElement);
+            morphologyEx(mask.clone(), closing, MORPH_CLOSE, structureElement);
+            mask = opening + closing;
+         }
+
+         cv::imshow ("MASK", mask);
+
+         cv::Mat hola;
+         inFrame.copyTo(hola, mask);
 
          if(cv::waitKey(5)==' '){
             cv::imwrite("out_" + to_string(frameNumber) + ".png", outFrame);
          }
-         cv::imshow("Output with Color", outFrame);
+         cv::imshow("Output with Color", hola);
 
-         cvtColor(outFrame, gray, COLOR_RGB2GRAY);
-
-         if(sizeSE_value!=0){
-            morphologyEx(gray.clone(), opening, MORPH_OPEN, structureElement);
-            morphologyEx(gray.clone(), closing, MORPH_CLOSE, structureElement);
-            gray=opening + closing;
-         }
-
-         threshold(gray.clone(), gray, threshold_value, 255, THRESH_BINARY);
-         output.write(gray);
-         cv::imshow ("Output", gray);
+         output.write(mask);
       }
 
       wasOk=input.read(inFrame);
@@ -165,8 +168,8 @@ int main (int argc, char * const argv[]){
    return 0;
 }
 static void on_trackbar(int threshold_value, void* ptr){
-   Mat *outFrame = (Mat*)ptr;
-   threshold(outFrame->clone(), *outFrame, threshold_value, 0, THRESH_TOZERO);
+   Mat *mask = (Mat*)ptr;
+   threshold(mask->clone(), *mask, threshold_value, 255, THRESH_BINARY);
 }
 static void on_trackbar_1(int brightness, void* ptr){
    double value = (double)brightness;
