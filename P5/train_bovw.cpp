@@ -44,6 +44,15 @@ main(int argc, char ** argv){
 	TCLAP::ValueArg<int> neighbours("", "neighbours", "Number of neighbours for KNN. Default 1", false, 1, "int");
 	cmd.add(neighbours);
 
+	TCLAP::ValueArg<std::string> descriptorToUse("", "descriptor", "Type of descriptor. Default SIFT", false, "SIFT", "string");
+	cmd.add(descriptorToUse);
+
+	TCLAP::ValueArg<std::string> nameOfDict("", "dict_name", "Name of the dictionary. Default dictionary.yml", false, "dictionary.yml", "string");
+	cmd.add(nameOfDict);
+
+	TCLAP::ValueArg<std::string> nameOfClassifier("", "classifier_name", "Name of classifier. Default classifier.yml", false, "classifier.yml", "string");
+	cmd.add(nameOfClassifier);
+
 	cmd.parse(argc, argv);
 
 	std::vector<std::string> categories;
@@ -107,7 +116,18 @@ main(int argc, char ** argv){
 					resize(img, img, cv::Size(IMG_WIDTH, round(IMG_WIDTH*img.rows / img.cols)));
 
 					cv::Mat descs;
-					descs = extractSIFTDescriptors(img, ndesc.getValue());
+					if(descriptorToUse.getValue()=="SIFT"){
+						descs = extractSIFTDescriptors(img, ndesc.getValue());
+					}
+					else if(descriptorToUse.getValue()=="SURF"){
+						descs = extractSURFDescriptors(img);
+					}
+					else if(descriptorToUse.getValue()=="DSIFT"){
+						descs = extractDenseSIFTDescriptors(img);
+					}
+					else{
+						descs = extractSIFTDescriptors(img, ndesc.getValue());
+					}
 
 					if(train_descs.empty()){
 						train_descs = descs;
@@ -219,7 +239,18 @@ main(int argc, char ** argv){
 					//cv::Mat descs = extractSIFTDescriptors(img, ndesc.getValue());
 					cv::Mat descs;
 
-					descs = extractSIFTDescriptors(img, ndesc.getValue());
+					if(descriptorToUse.getValue()=="SIFT"){
+						descs = extractSIFTDescriptors(img, ndesc.getValue());
+					}
+					else if(descriptorToUse.getValue()=="SURF"){
+						descs = extractSURFDescriptors(img);
+					}
+					else if(descriptorToUse.getValue()=="DSIFT"){
+						descs = extractDenseSIFTDescriptors(img);
+					}
+					else{
+						descs = extractSIFTDescriptors(img, ndesc.getValue());
+					}
 
 					cv::Mat bovw = compute_bovw(dict, keyws.rows, descs);
 					if(test_bovw.empty()){
@@ -266,11 +297,11 @@ main(int argc, char ** argv){
 
 	//Saving the best models.
 	cv::FileStorage dictFile;
-	dictFile.open("dictionary.yml", cv::FileStorage::WRITE);
+	dictFile.open(nameOfDict.getValue(), cv::FileStorage::WRITE);
 	dictFile << "keywords" << keywords.getValue();
 	best_dictionary->write(dictFile);
 	dictFile.release();
-	best_classifier->save("classifier.yml");
+	best_classifier->save(nameOfClassifier.getValue());
 
 	std::clog << "###################### FINAL STATISTICS  ################################" << std::endl;
 

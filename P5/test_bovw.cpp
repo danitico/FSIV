@@ -33,10 +33,26 @@ int main(int argc, char **argv){
 
 	cmd.parse(argc, argv);
 
+   std::vector<std::string> categories;
+   std::vector<int> samples_per_cat;
+   load_dataset_information(config.getValue(), categories, samples_per_cat);
+
+   cv::FileStorage dictFile;
+   dictFile.open(dictionaryFile.getValue(), cv::FileStorage::READ);
+   int keywords;
+   dictFile["keywords"]>>keywords;
+   cv::Ptr<cv::ml::KNearest> dict = cv::Algorithm::read<cv::ml::KNearest>(dictFile.root());
+   dictFile.release();
+
+   cv::Ptr<cv::ml::KNearest> knnClassifier = cv::Algorithm::load<cv::ml::KNearest>(classifierFile.getValue());
+   knnClassifier->setDefaultK(neighbours.getValue());
+
    cv::Mat image = imread(filename.getValue(), cv::IMREAD_GRAYSCALE);
    resize(image, image, cv::Size(IMG_WIDTH, round(IMG_WIDTH*image.rows / image.cols)));
-   cv::Mat descriptorsMat;
+   std::cout << image.rows << '\n';
+   std::cout << image.cols << '\n';
 
+   cv::Mat descriptorsMat;
    if(descriptor.getValue()=="SIFT"){
       descriptorsMat=extractSIFTDescriptors(image);
    }
@@ -48,24 +64,14 @@ int main(int argc, char **argv){
       exit(-1);
    }
 
-   cv::FileStorage dictFile;
-   dictFile.open(dictionaryFile.getValue(), cv::FileStorage::READ);
-   int keywords;
-   dictFile["keywords"]>>keywords;
-   cv::Ptr<cv::ml::KNearest> dict = cv::Algorithm::read<cv::ml::KNearest>(dictFile.root());
-   dictFile.release();
-
-
    cv::Mat bovw = compute_bovw(dict, keywords, descriptorsMat);
 
    cv::Ptr<cv::ml::StatModel> classifier;
-
-   cv::Ptr<cv::ml::KNearest> knnClassifier = cv::Algorithm::load<cv::ml::KNearest>(classifierFile.getValue());
-   knnClassifier->setDefaultK(neighbours.getValue());
-
    classifier = knnClassifier;
 
    cv::Mat predicted_labels;
    classifier->predict(bovw, predicted_labels);
-   std::cout << predicted_labels.at<float>(0,0) << '\n';
+   cv::namedWindow(categories[predicted_labels.at<float>(0,0)]);
+   cv::imshow(categories[predicted_labels.at<float>(0,0)], image);
+   cv::waitKey(0);
 }

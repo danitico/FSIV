@@ -159,8 +159,31 @@ cv::Mat extractSIFTDescriptors(const cv::Mat& img, const int ndesc){
    return descs;
 }
 
+cv::Mat extractDenseSIFTDescriptors(const cv::Mat & img){
+   cv::Ptr<cv::xfeatures2d::SIFT> dsift = cv::xfeatures2d::SIFT::create();
+   std::vector<cv::KeyPoint> kps;
+   cv::Mat descriptors;
+   std::vector<int> scales;
+   scales.push_back(300/3);
+   scales.push_back(300/6);
+   scales.push_back(300/12);
+
+   for(int i=0; i<scales.size(); i++){
+      for(int j=scales[i]; j < img.rows - scales[i]; j+=scales[i]){
+         for(int k=scales[i]; k < img.cols - scales[i]; j+=scales[i]){
+            kps.push_back(cv::KeyPoint(float(k), float(j), float(scales[i])));
+         }
+      }
+   }
+
+   dsift->detectAndCompute(img, cv::noArray(), kps, descriptors);
+
+   return descriptors;
+}
+
 cv::Mat extractSURFDescriptors(const cv::Mat & img){
    cv::Ptr<cv::xfeatures2d::SURF> surf = cv::xfeatures2d::SURF::create();
+   // surf->setExtended(true);
    std::vector<cv::KeyPoint> kps;
    cv::Mat descriptors;
    surf->detectAndCompute(img, cv::noArray(), kps, descriptors);

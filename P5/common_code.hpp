@@ -64,7 +64,7 @@ cv::Mat compute_confusion_matrix(int n_categories, const cv::Mat& true_labels, c
  * @return The set of SIFT descriptors
  */
 cv::Mat extractSIFTDescriptors(const cv::Mat& img, const int ndesc=0);
-
+cv::Mat extractDenseSIFTDescriptors(const cv::Mat & img);
 cv::Mat extractSURFDescriptors(const cv::Mat & img);
 
 /**
