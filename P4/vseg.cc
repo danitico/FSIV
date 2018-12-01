@@ -117,7 +117,7 @@ int main (int argc, char * const argv[]){
       on_trackbar_5(gain, (void*)&input);
    }
 
-   Mat opening, closing, siguiente, gray, structureElement;
+   Mat opening, closing, siguiente, gray, structureElement, mask;
    if(sizeSE_value!=0){
       structureElement=getStructuringElement(MORPH_RECT, Size(2*sizeSE_value+1, 2*sizeSE_value+1));
    }
@@ -137,7 +137,7 @@ int main (int argc, char * const argv[]){
          }
          cvtColor(outFrame, gray, COLOR_RGB2GRAY);
 
-         cv::Mat mask=gray.clone();
+         mask=gray.clone();
          on_trackbar(threshold_value, (void*)&mask);
 
          if(sizeSE_value!=0){
@@ -148,13 +148,13 @@ int main (int argc, char * const argv[]){
 
          cv::imshow ("MASK", mask);
 
-         cv::Mat hola;
-         inFrame.copyTo(hola, mask);
+         cv::Mat objects;
+         inFrame.copyTo(objects, mask);
 
          if(cv::waitKey(5)==' '){
-            cv::imwrite("out_" + to_string(frameNumber) + ".png", outFrame);
+            cv::imwrite("out_" + to_string(frameNumber) + ".png", objects);
          }
-         cv::imshow("Output with Color", hola);
+         cv::imshow("Output with Color", objects);
 
          output.write(mask);
       }
