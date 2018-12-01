@@ -62,8 +62,10 @@ cv::Mat compute_confusion_matrix(int n_categories, const cv::Mat& true_labels, c
  * @param[in] img Input image
  * @param[in] ndesc Maximum number of descriptors to be returned
  * @return The set of SIFT descriptors
- */ 
-cv::Mat extractSIFTDescriptors(const cv::Mat& img, const int ndesc);
+ */
+cv::Mat extractSIFTDescriptors(const cv::Mat& img, const int ndesc=0);
+
+cv::Mat extractSURFDescriptors(const cv::Mat & img);
 
 /**
  * @brief Computes a Bag of Visual Words descriptor
@@ -72,6 +74,6 @@ cv::Mat extractSIFTDescriptors(const cv::Mat& img, const int ndesc);
  * @param[in] img_descs the set of keypoint descriptors used to represent the image
  * @return the BoVW descriptor
  */
-cv::Mat compute_bovw (const cv::Ptr<cv::ml::KNearest>& dict, const int dict_size, cv::Mat& img_descs, bool normalize=true);
+cv::Mat compute_bovw(const cv::Ptr<cv::ml::KNearest>& dict, const int dict_size, cv::Mat& img_descs, bool normalize=true);
 
 #endif //__COMMON_CODE_HPP__

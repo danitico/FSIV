@@ -159,6 +159,15 @@ cv::Mat extractSIFTDescriptors(const cv::Mat& img, const int ndesc){
    return descs;
 }
 
+cv::Mat extractSURFDescriptors(const cv::Mat & img){
+   cv::Ptr<cv::xfeatures2d::SURF> surf = cv::xfeatures2d::SURF::create();
+   std::vector<cv::KeyPoint> kps;
+   cv::Mat descriptors;
+   surf->detectAndCompute(img, cv::noArray(), kps, descriptors);
+
+   return descriptors;
+}
+
 
 cv::Mat compute_bovw (const cv::Ptr<cv::ml::KNearest>& dict, const int dict_size, cv::Mat& img_descs, bool normalize){
    cv::Mat bovw = cv::Mat::zeros(1, dict_size, CV_32F);
