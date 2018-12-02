@@ -52,6 +52,10 @@ int main(int argc, char **argv){
    knnClassifier->setDefaultK(neighbours.getValue());
 
    cv::Mat image = imread(filename.getValue(), cv::IMREAD_GRAYSCALE);
+   if(image.rows==0){
+      std::cout << "La imagen no existe" << std::endl;
+      exit(-1);
+   }
    resize(image, image, cv::Size(IMG_WIDTH, round(IMG_WIDTH*image.rows / image.cols)));
 
    cv::Mat descriptorsMat;

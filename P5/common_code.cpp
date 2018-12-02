@@ -183,7 +183,7 @@ cv::Mat extractDenseSIFTDescriptors(const cv::Mat & img, const std::vector<int> 
    for(int i=0; i<siftScales.size(); i++){
       for(int j=siftScales[i]; j < img.rows - siftScales[i]; j+=siftScales[i]){
          for(int k=siftScales[i]; k < img.cols - siftScales[i]; k+=siftScales[i]){
-            kps.push_back(cv::KeyPoint(float(k), float(j), float(siftScales[i])));
+            kps.push_back(cv::KeyPoint(float(k), float(j), float(siftScales[i]*2)));
          }
       }
    }
