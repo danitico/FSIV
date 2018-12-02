@@ -31,8 +31,12 @@ int main(int argc, char **argv){
 	TCLAP::ValueArg<int> neighbours("", "neighbours", "Number of neighbours for KNN. Default 1", false, 1, "int");
 	cmd.add(neighbours);
 
+   TCLAP::ValueArg<int> ratio("", "ratio", "Ratio for Dense Sift. Default 30", false, 30, "int");
+   cmd.add(ratio);
+
 	cmd.parse(argc, argv);
 
+   std::vector<int> siftScales{ 9, 13 }; // 5 , 9
    std::vector<std::string> categories;
    std::vector<int> samples_per_cat;
    load_dataset_information(config.getValue(), categories, samples_per_cat);
@@ -49,8 +53,6 @@ int main(int argc, char **argv){
 
    cv::Mat image = imread(filename.getValue(), cv::IMREAD_GRAYSCALE);
    resize(image, image, cv::Size(IMG_WIDTH, round(IMG_WIDTH*image.rows / image.cols)));
-   std::cout << image.rows << '\n';
-   std::cout << image.cols << '\n';
 
    cv::Mat descriptorsMat;
    if(descriptor.getValue()=="SIFT"){
@@ -60,7 +62,7 @@ int main(int argc, char **argv){
       descriptorsMat=extractSURFDescriptors(image);
    }
    else if(descriptor.getValue()=="DSIFT"){
-      descriptorsMat=extractDenseSIFTDescriptors(image);
+      descriptorsMat=extractDenseSIFTDescriptors(image, siftScales);
    }
    else{
       std::cout << "Ese tipo de descriptor no está disponible" << std::endl;

@@ -55,7 +55,7 @@ void compute_recognition_rate(const cv::Mat& cmat, double& mean, double& dev);
   * @return the confussion matrix.
   */
 cv::Mat compute_confusion_matrix(int n_categories, const cv::Mat& true_labels, const cv::Mat& predicted_labels);
-
+void displayConfusionMatrix(const cv::Mat & confusion_matrix);
 
 /**
  * @brief Extracts sparse SIFT descriptors given an image
@@ -64,7 +64,7 @@ cv::Mat compute_confusion_matrix(int n_categories, const cv::Mat& true_labels, c
  * @return The set of SIFT descriptors
  */
 cv::Mat extractSIFTDescriptors(const cv::Mat& img, const int ndesc=0);
-cv::Mat extractDenseSIFTDescriptors(const cv::Mat & img);
+cv::Mat extractDenseSIFTDescriptors(const cv::Mat & img, const std::vector<int> siftScales);
 cv::Mat extractSURFDescriptors(const cv::Mat & img);
 
 /**

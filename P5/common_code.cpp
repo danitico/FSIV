@@ -134,6 +134,22 @@ cv::Mat compute_confusion_matrix(int n_categories, const cv::Mat& true_labels, c
    return confussion_mat;
 }
 
+void displayConfusionMatrix(const cv::Mat & confusion_matrix){
+   std::cout << "     ";
+   for(int j=0; j<confusion_matrix.cols; j++){
+      std::cout << "P#" << (j+1) << "\t";
+   }
+   std::cout << std::endl;
+
+   for(int i=0; i<confusion_matrix.rows; i++){
+      std::cout << "T#" << i+1 << "  ";
+      for(int j=0; j<confusion_matrix.cols; j++){
+         std::cout << confusion_matrix.at<float>(i, j) << "\t\t";
+      }
+      std::cout << std::endl;
+   }
+}
+
 void compute_recognition_rate(const cv::Mat& cmat, double& mean, double& dev){
    CV_Assert(cmat.rows == cmat.cols && cmat.rows>1);
    CV_Assert(cmat.depth()==CV_32F);
@@ -159,19 +175,15 @@ cv::Mat extractSIFTDescriptors(const cv::Mat& img, const int ndesc){
    return descs;
 }
 
-cv::Mat extractDenseSIFTDescriptors(const cv::Mat & img){
+cv::Mat extractDenseSIFTDescriptors(const cv::Mat & img, const std::vector<int> siftScales){
    cv::Ptr<cv::xfeatures2d::SIFT> dsift = cv::xfeatures2d::SIFT::create();
    std::vector<cv::KeyPoint> kps;
    cv::Mat descriptors;
-   std::vector<int> scales;
-   scales.push_back(300/3);
-   scales.push_back(300/6);
-   scales.push_back(300/12);
 
-   for(int i=0; i<scales.size(); i++){
-      for(int j=scales[i]; j < img.rows - scales[i]; j+=scales[i]){
-         for(int k=scales[i]; k < img.cols - scales[i]; k+=scales[i]){
-            kps.push_back(cv::KeyPoint(float(k), float(j), float(scales[i])));
+   for(int i=0; i<siftScales.size(); i++){
+      for(int j=siftScales[i]; j < img.rows - siftScales[i]; j+=siftScales[i]){
+         for(int k=siftScales[i]; k < img.cols - siftScales[i]; k+=siftScales[i]){
+            kps.push_back(cv::KeyPoint(float(k), float(j), float(siftScales[i])));
          }
       }
    }

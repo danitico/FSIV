@@ -80,12 +80,11 @@ main(int argc, char ** argv){
 	std::cout << std::endl;
 	std::vector<float> rRates(n_runsArg.getValue(), 0.0);
 
-	int sift_type = 0;
-
 	std::vector<int> siftScales{ 9, 13 }; // 5 , 9
 
 	cv::Ptr<cv::ml::KNearest> best_dictionary;
 	cv::Ptr<cv::ml::StatModel> best_classifier;
+	std::vector<cv::Mat> confusion_matrices;
 	double best_rRate = 0.0;
 
 	for(int trail=0; trail<n_runsArg.getValue(); trail++){
@@ -123,7 +122,7 @@ main(int argc, char ** argv){
 						descs = extractSURFDescriptors(img);
 					}
 					else if(descriptorToUse.getValue()=="DSIFT"){
-						descs = extractDenseSIFTDescriptors(img);
+						descs = extractDenseSIFTDescriptors(img, siftScales);
 					}
 					else{
 						descs = extractSIFTDescriptors(img, ndesc.getValue());
@@ -246,7 +245,7 @@ main(int argc, char ** argv){
 						descs = extractSURFDescriptors(img);
 					}
 					else if(descriptorToUse.getValue()=="DSIFT"){
-						descs = extractDenseSIFTDescriptors(img);
+						descs = extractDenseSIFTDescriptors(img, siftScales);
 					}
 					else{
 						descs = extractSIFTDescriptors(img, ndesc.getValue());
@@ -282,6 +281,7 @@ main(int argc, char ** argv){
 		//compute the classifier's confusion matrix.
 		std::clog << "\tComputing confusion matrix." << std::endl;
 		cv::Mat confusion_mat = compute_confusion_matrix(categories.size(), cv::Mat(true_labels), predicted_labels);
+		confusion_matrices.push_back(confusion_mat);
 		CV_Assert(int(cv::sum(confusion_mat)[0]) == test_bovw.rows);
 		double rRate_mean, rRate_dev;
 		compute_recognition_rate(confusion_mat, rRate_mean, rRate_dev);
@@ -302,6 +302,12 @@ main(int argc, char ** argv){
 	best_dictionary->write(dictFile);
 	dictFile.release();
 	best_classifier->save(nameOfClassifier.getValue());
+
+	// for(int i=0; i<confusion_matrices.size(); i++){
+	// 	std::cout << std::endl << "\tTRIAL " << (i+1) << std::endl;
+	// 	displayConfusionMatrix(confusion_matrices[i]);
+	// 	std::cout << std::endl;
+	// }
 
 	std::clog << "###################### FINAL STATISTICS  ################################" << std::endl;
 
