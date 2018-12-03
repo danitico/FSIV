@@ -9,5 +9,5 @@ include_directories(${CMAKE_SOURCE_DIR}/tclap-1.2.1/include ${OpenCV_INCLUDE_DIR
 LINK_LIBRARIES(${OpenCV_LIBS})
 
 # For students
-add_executable(train_bovw train_bovw.cpp common_code.cpp common_code.hpp)
-add_executable(test_bovw test_bovw.cpp common_code.cpp common_code.hpp)
+add_executable(train_bovw src/train_bovw.cpp src/common_code.cpp src/common_code.hpp)
+add_executable(test_bovw src/test_bovw.cpp src/common_code.cpp src/common_code.hpp)
