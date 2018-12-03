@@ -188,7 +188,7 @@ cv::Mat extractDenseSIFTDescriptors(const cv::Mat & img, const std::vector<int> 
       }
    }
 
-   dsift->detectAndCompute(img, cv::noArray(), kps, descriptors);
+   dsift->detectAndCompute(img, cv::noArray(), kps, descriptors, true);
 
    return descriptors;
 }
@@ -200,6 +200,15 @@ cv::Mat extractSURFDescriptors(const cv::Mat & img){
    surf->detectAndCompute(img, cv::noArray(), kps, descriptors);
 
    return descriptors;
+}
+cv::Mat extractPHOWDescriptors(const cv::Mat & img, const std::vector<int> siftScales){
+   cv::Mat descriptorsDummie, descriptors1, descriptors2, descriptors3;
+
+   descriptors1=extractDenseSIFTDescriptors(img, siftScales);
+
+   // cv::Mat prueba = img.clone();
+   // cv::Mat pipo = prueba(cv::Rect(0, 0, 150, ))
+   
 }
 
 

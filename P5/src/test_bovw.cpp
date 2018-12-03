@@ -31,9 +31,6 @@ int main(int argc, char **argv){
 	TCLAP::ValueArg<int> neighbours("", "neighbours", "Number of neighbours for KNN. Default 1", false, 1, "int");
 	cmd.add(neighbours);
 
-   TCLAP::ValueArg<int> ratio("", "ratio", "Ratio for Dense Sift. Default 30", false, 30, "int");
-   cmd.add(ratio);
-
 	cmd.parse(argc, argv);
 
    std::vector<int> siftScales{ 9, 13 }; // 5 , 9

@@ -66,6 +66,7 @@ void displayConfusionMatrix(const cv::Mat & confusion_matrix);
 cv::Mat extractSIFTDescriptors(const cv::Mat& img, const int ndesc=0);
 cv::Mat extractDenseSIFTDescriptors(const cv::Mat & img, const std::vector<int> siftScales);
 cv::Mat extractSURFDescriptors(const cv::Mat & img);
+cv::Mat extractPHOWDescriptors(const cv::Mat & img, const std::vector<int> siftScales);
 
 /**
  * @brief Computes a Bag of Visual Words descriptor
