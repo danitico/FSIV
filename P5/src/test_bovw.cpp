@@ -65,6 +65,9 @@ int main(int argc, char **argv){
    else if(descriptor.getValue()=="DSIFT"){
       descriptorsMat=extractDenseSIFTDescriptors(image, siftScales);
    }
+   else if(descriptor.getValue()=="PHOW"){
+      descriptorsMat=extractPHOWDescriptors(image, siftScales);
+   }
    else{
       std::cout << "Ese tipo de descriptor no está disponible" << std::endl;
       exit(-1);

@@ -124,6 +124,9 @@ main(int argc, char ** argv){
 					else if(descriptorToUse.getValue()=="DSIFT"){
 						descs = extractDenseSIFTDescriptors(img, siftScales);
 					}
+					else if(descriptorToUse.getValue()=="PHOW"){
+						descs = extractPHOWDescriptors(img, siftScales);
+					}
 					else{
 						descs = extractSIFTDescriptors(img, ndesc.getValue());
 					}
@@ -235,7 +238,6 @@ main(int argc, char ** argv){
 					// Fix size
 					resize(img, img, cv::Size(IMG_WIDTH, round(IMG_WIDTH*img.rows / img.cols)));
 
-					//cv::Mat descs = extractSIFTDescriptors(img, ndesc.getValue());
 					cv::Mat descs;
 
 					if(descriptorToUse.getValue()=="SIFT"){
@@ -246,6 +248,9 @@ main(int argc, char ** argv){
 					}
 					else if(descriptorToUse.getValue()=="DSIFT"){
 						descs = extractDenseSIFTDescriptors(img, siftScales);
+					}
+					else if(descriptorToUse.getValue()=="PHOW"){
+						descs = extractPHOWDescriptors(img, siftScales);
 					}
 					else{
 						descs = extractSIFTDescriptors(img, ndesc.getValue());

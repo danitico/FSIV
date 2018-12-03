@@ -202,13 +202,55 @@ cv::Mat extractSURFDescriptors(const cv::Mat & img){
    return descriptors;
 }
 cv::Mat extractPHOWDescriptors(const cv::Mat & img, const std::vector<int> siftScales){
-   cv::Mat descriptorsDummie, descriptors1, descriptors2, descriptors3;
+   cv::Mat descriptors;
+   std::vector<cv::Mat> level1, level2;
+   std::vector<cv::Mat> imagenes;
 
-   descriptors1=extractDenseSIFTDescriptors(img, siftScales);
+   int filas=img.rows;
+   if(filas%2!=0){
+      filas--;
+   }
 
-   // cv::Mat prueba = img.clone();
-   // cv::Mat pipo = prueba(cv::Rect(0, 0, 150, ))
-   
+   descriptors=extractDenseSIFTDescriptors(img, siftScales);
+   int filas_level_1 = filas/2, columnas_level_1 = img.cols/2;
+
+   for(int i=0; i<filas; i+=filas_level_1){
+      for(int j=0; j<img.cols; j+=columnas_level_1){
+         cv::Rect rect(j, i, columnas_level_1, filas_level_1);
+         cv::Mat subImage= img(rect);
+         imagenes.push_back(subImage);
+         cv::vconcat(extractDenseSIFTDescriptors(subImage, siftScales), descriptors, descriptors);
+      }
+   }
+
+   for(int k=0; k<imagenes.size(); k++){
+      int filas=imagenes[k].rows;
+      if(filas%2!=0){
+         filas--;
+      }
+      int columnas=imagenes[k].cols;
+      if(columnas%2!=0){
+         columnas--;
+      }
+
+      int filas_level_2 = filas/2, columnas_level_2 = columnas/2;
+      for(int i=0; i<filas; i+=filas_level_2){
+         for(int j=0; j<columnas; j+=columnas_level_2){
+            cv::Rect rect(j, i, columnas_level_2, filas_level_2);
+            // std::cout << rect.height << '\n';
+            // std::cout << rect.width << '\n';
+            // std::cout << rect.x << '\n';
+            // std::cout << rect.y << '\n';
+            cv::Mat subImage = imagenes[k](rect);
+            cv::vconcat(extractDenseSIFTDescriptors(subImage, siftScales), descriptors, descriptors);
+         }
+      }
+   }
+
+   // cv::vconcat(level1, level1.size(), descriptors);
+   // cv::vconcat(level2, level2.size(), descriptors);
+
+   return descriptors;
 }
 
 
