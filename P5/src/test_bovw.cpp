@@ -48,7 +48,14 @@ int main(int argc, char **argv){
    cv::Ptr<cv::ml::KNearest> knnClassifier = cv::Algorithm::load<cv::ml::KNearest>(classifierFile.getValue());
    knnClassifier->setDefaultK(neighbours.getValue());
 
-   cv::Mat image = imread(filename.getValue(), cv::IMREAD_GRAYSCALE);
+   cv::Mat image;
+   if(descriptor.getValue()!="PHOW"){
+      image = cv::imread(filename.getValue(), cv::IMREAD_GRAYSCALE);
+   }
+   else{
+      image = cv::imread(filename.getValue());
+      cvtcolor(image, image, cv::COLOR_BGR2HSV);
+   }
    if(image.rows==0){
       std::cout << "La imagen no existe" << std::endl;
       exit(-1);
