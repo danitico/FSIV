@@ -202,7 +202,6 @@ cv::Mat extractSURFDescriptors(const cv::Mat & img){
    return descriptors;
 }
 cv::Mat extractPHOWDescriptors(const cv::Mat & img, const std::vector<int> siftScales){
-   cv::Mat descriptors;
    std::vector<cv::Mat> level1, level2;
    std::vector<cv::Mat> imagenes;
 
@@ -213,8 +212,11 @@ cv::Mat extractPHOWDescriptors(const cv::Mat & img, const std::vector<int> siftS
 
    cv::Mat splitted[3];
    split(img, splitted);
-   for(int i=0; i<3; i++){
-      cv::vconcat(extractDenseSIFTDescriptors(splitted[i], siftScales), descriptors, descriptors);
+   cv::Mat descriptors = extractDenseSIFTDescriptors(splitted[0], siftScales);
+
+   for(int i=1; i<3; i++){
+      cv::Mat suma=extractDenseSIFTDescriptors(splitted[i], siftScales);
+      cv::vconcat(suma, descriptors, descriptors);
    }
    int filas_level_1 = filas/2, columnas_level_1 = img.cols/2;
 

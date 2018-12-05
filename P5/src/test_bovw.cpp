@@ -54,7 +54,7 @@ int main(int argc, char **argv){
    }
    else{
       image = cv::imread(filename.getValue());
-      cvtcolor(image, image, cv::COLOR_BGR2HSV);
+      cv::cvtColor(image, image, cv::COLOR_BGR2HSV);
    }
    if(image.rows==0){
       std::cout << "La imagen no existe" << std::endl;

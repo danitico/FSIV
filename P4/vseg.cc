@@ -151,7 +151,7 @@ int main (int argc, char * const argv[]){
          cv::Mat objects;
          inFrame.copyTo(objects, mask);
 
-         if(cv::waitKey(5)==' '){
+         if(cv::waitKey(20)==' '){
             cv::imwrite("out_" + to_string(frameNumber) + ".png", objects);
          }
          cv::imshow("Output with Color", objects);

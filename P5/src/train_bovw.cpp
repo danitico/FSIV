@@ -17,10 +17,10 @@ int
 main(int argc, char ** argv){
 	TCLAP::CmdLine cmd("Train and test a BoVW model", ' ', "0.0");
 
-	TCLAP::ValueArg<std::string> basenameArg("", "basename", "basename for the dataset.", false, "./data", "pathname");
+	TCLAP::ValueArg<std::string> basenameArg("", "basename", "basename for the dataset.", false, "../src/data", "pathname");
 	cmd.add(basenameArg);
 
-	TCLAP::ValueArg<std::string> configFile("", "config_file", "configuration file for the dataset.", false, "101_ObjectCategories_conf.txt", "pathname");
+	TCLAP::ValueArg<std::string> configFile("", "config_file", "configuration file for the dataset.", false, "02_ObjectCategories_conf.txt", "pathname");
 	cmd.add(configFile);
 
 	TCLAP::ValueArg<int> n_runsArg("", "n_runs", "Number of trials train/set to compute the recognition rate. Default 10.", false, 10, "int");
@@ -105,7 +105,14 @@ main(int argc, char ** argv){
 			std::clog << "  " << std::setfill(' ') << std::setw(3) << (c * 100) / train_samples.size() << " %   \015";
 			for(size_t s = 0; s < train_samples[c].size(); ++s){
 				std::string filename = compute_sample_filename(basenameArg.getValue(), categories[c], train_samples[c][s]);
-				cv::Mat img = cv::imread(filename, cv::IMREAD_GRAYSCALE);
+				cv::Mat img;
+				if(descriptorToUse.getValue()!="PHOW"){
+					img = cv::imread(filename, cv::IMREAD_GRAYSCALE);
+				}
+				else{
+					img = cv::imread(filename);
+					cvtColor(img, img, cv::COLOR_BGR2HSV);
+				}
 				if(img.empty()){
 					std::cerr << "Error: could not read image '" << filename << "'." << std::endl;
 					exit(-1);
@@ -230,7 +237,14 @@ main(int argc, char ** argv){
 			std::clog << "  " << std::setfill(' ') << std::setw(3) << (c * 100) / train_samples.size() << " %   \015";
 		   for(size_t s = 0; s < test_samples[c].size(); ++s){
 				std::string filename = compute_sample_filename(basenameArg.getValue(), categories[c], test_samples[c][s]);
-				cv::Mat img = cv::imread(filename, cv::IMREAD_GRAYSCALE);
+				cv::Mat img;
+				if(descriptorToUse.getValue()!="PHOW"){
+					img = cv::imread(filename, cv::IMREAD_GRAYSCALE);
+				}
+				else{
+					img = cv::imread(filename);
+					cvtColor(img, img, cv::COLOR_BGR2HSV);
+				}
 				if(img.empty()){
 					std::cerr << "Error: could not read image '" << filename << "'." << std::endl;
 				}
