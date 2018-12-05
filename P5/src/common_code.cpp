@@ -211,7 +211,11 @@ cv::Mat extractPHOWDescriptors(const cv::Mat & img, const std::vector<int> siftS
       filas--;
    }
 
-   descriptors=extractDenseSIFTDescriptors(img, siftScales);
+   cv::Mat splitted[3];
+   split(img, splitted);
+   for(int i=0; i<3; i++){
+      cv::vconcat(extractDenseSIFTDescriptors(splitted[i], siftScales), descriptors, descriptors);
+   }
    int filas_level_1 = filas/2, columnas_level_1 = img.cols/2;
 
    for(int i=0; i<filas; i+=filas_level_1){
@@ -219,7 +223,11 @@ cv::Mat extractPHOWDescriptors(const cv::Mat & img, const std::vector<int> siftS
          cv::Rect rect(j, i, columnas_level_1, filas_level_1);
          cv::Mat subImage= img(rect);
          imagenes.push_back(subImage);
-         cv::vconcat(extractDenseSIFTDescriptors(subImage, siftScales), descriptors, descriptors);
+         split(subImage, splitted);
+
+         for(int i=0; i<3; i++){
+            cv::vconcat(extractDenseSIFTDescriptors(splitted[i], siftScales), descriptors, descriptors);
+         }
       }
    }
 
@@ -237,19 +245,15 @@ cv::Mat extractPHOWDescriptors(const cv::Mat & img, const std::vector<int> siftS
       for(int i=0; i<filas; i+=filas_level_2){
          for(int j=0; j<columnas; j+=columnas_level_2){
             cv::Rect rect(j, i, columnas_level_2, filas_level_2);
-            // std::cout << rect.height << '\n';
-            // std::cout << rect.width << '\n';
-            // std::cout << rect.x << '\n';
-            // std::cout << rect.y << '\n';
             cv::Mat subImage = imagenes[k](rect);
-            cv::vconcat(extractDenseSIFTDescriptors(subImage, siftScales), descriptors, descriptors);
+            split(subImage, splitted);
+
+            for(int i=0; i<3; i++){
+               cv::vconcat(extractDenseSIFTDescriptors(splitted[i], siftScales), descriptors, descriptors);
+            }
          }
       }
    }
-
-   // cv::vconcat(level1, level1.size(), descriptors);
-   // cv::vconcat(level2, level2.size(), descriptors);
-
    return descriptors;
 }
 
