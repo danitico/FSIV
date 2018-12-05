@@ -2,7 +2,7 @@
 
 cmake_minimum_required (VERSION 3.0)
 project (image_classifier)
-set(CMAKE_CXX_FLAGS "-std=c++11 -g")
+set(CMAKE_CXX_FLAGS "-std=c++11 -g -O2")
 find_package(OpenCV 3.1 REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/tclap-1.2.1/include ${OpenCV_INCLUDE_DIRS})
