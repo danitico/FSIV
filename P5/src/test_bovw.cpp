@@ -88,6 +88,11 @@ int main(int argc, char **argv){
    cv::Mat predicted_labels;
    classifier->predict(bovw, predicted_labels);
    cv::namedWindow(categories[predicted_labels.at<float>(0,0)]);
+
+   if(descriptor.getValue()=="PHOW"){
+      cv::cvtColor(image, image, cv::COLOR_HSV2BGR);
+   }
+
    cv::imshow(categories[predicted_labels.at<float>(0,0)], image);
    cv::waitKey(0);
 }

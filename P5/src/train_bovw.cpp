@@ -322,11 +322,11 @@ main(int argc, char ** argv){
 	dictFile.release();
 	best_classifier->save(nameOfClassifier.getValue());
 
-	// for(int i=0; i<confusion_matrices.size(); i++){
-	// 	std::cout << std::endl << "\tTRIAL " << (i+1) << std::endl;
-	// 	displayConfusionMatrix(confusion_matrices[i]);
-	// 	std::cout << std::endl;
-	// }
+	for(int i=0; i<confusion_matrices.size(); i++){
+		std::cout << std::endl << "\tTRIAL " << (i+1) << std::endl;
+		displayConfusionMatrix(confusion_matrices[i]);
+		std::cout << std::endl;
+	}
 
 	std::clog << "###################### FINAL STATISTICS  ################################" << std::endl;
 
