@@ -44,8 +44,17 @@ main(int argc, char ** argv){
 	TCLAP::ValueArg<int> neighbours("", "neighbours", "Number of neighbours for KNN. Default 1", false, 1, "int");
 	cmd.add(neighbours);
 
+	TCLAP::ValueArg<std::string> kernel("", "kernel", "Type of kernel for SVM. Default LINEAR", false, "LINEAR", "string");
+	cmd.add(kernel);
+
+	TCLAP::ValueArg<double> margin("", "margin", "Margin parameter for SVM. Default 0", false, 0, "int");
+	cmd.add(margin);
+
 	TCLAP::ValueArg<std::string> descriptorToUse("", "descriptor", "Type of descriptor. Default SIFT", false, "SIFT", "string");
 	cmd.add(descriptorToUse);
+
+	TCLAP::ValueArg<std::string> classifierToUse("", "classifier", "Type of classifier. Default KNN", false, "KNN", "string");
+	cmd.add(classifierToUse);
 
 	TCLAP::ValueArg<std::string> nameOfDict("", "dict_name", "Name of the dictionary. Default dictionary.yml", false, "dictionary.yml", "string");
 	cmd.add(nameOfDict);
@@ -209,12 +218,40 @@ main(int argc, char ** argv){
 		cv::Ptr<cv::ml::StatModel> classifier;
 
 		//Create the classifier.
-		//Train a KNN classifier using the training bovws like patterns.
-		cv::Ptr<cv::ml::KNearest> knnClassifier = cv::ml::KNearest::create();
-		knnClassifier->setAlgorithmType(cv::ml::KNearest::BRUTE_FORCE);
-		knnClassifier->setDefaultK(neighbours.getValue());
-		knnClassifier->setIsClassifier(true);
-		classifier = knnClassifier;
+		if(classifierToUse.getValue()=="KNN"){
+			//Train a KNN classifier using the training bovws like patterns.
+			cv::Ptr<cv::ml::KNearest> knnClassifier = cv::ml::KNearest::create();
+			knnClassifier->setAlgorithmType(cv::ml::KNearest::BRUTE_FORCE);
+			knnClassifier->setDefaultK(neighbours.getValue());
+			knnClassifier->setIsClassifier(true);
+			classifier = knnClassifier;
+		}
+		else{
+			if(classifierToUse.getValue()=="SVM"){
+				cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
+				svm->setType(cv::ml::SVM::C_SVC);
+				if(kernel.getValue()=="LINEAR"){
+					svm->setKernel(cv::ml::SVM::LINEAR);
+				}
+				else if(kernel.getValue()="RADIAL"){
+					svm->setKernel(cv::ml::SVM::RBF);
+				}
+				else if(kernel.getValue()=="POLINOMIAL"){
+					svm->setKernel(cv::ml::SVM::POLY);
+				}
+				else{
+					svm->setKernel(cv::ml::SVM::LINEAR);
+				}
+				svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 100, 1e-6));
+			}
+			else{
+				cv::Ptr<cv::ml::KNearest> knnClassifier = cv::ml::KNearest::create();
+				knnClassifier->setAlgorithmType(cv::ml::KNearest::BRUTE_FORCE);
+				knnClassifier->setDefaultK(neighbours.getValue());
+				knnClassifier->setIsClassifier(true);
+				classifier = knnClassifier;
+			}
+		}
 
 		cv::Mat train_labels(train_labels_v);
 		classifier->train(train_bovw, cv::ml::ROW_SAMPLE, train_labels);
