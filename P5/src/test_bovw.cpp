@@ -13,13 +13,16 @@
 int main(int argc, char **argv){
    TCLAP::CmdLine cmd("Train and test a BoVW model", ' ', "0.0");
 
-	TCLAP::ValueArg<std::string> filename("", "image", "Image to categorize", true, "", "pathname");
+	TCLAP::ValueArg<std::string> filename("", "image", "Image to categorize", false, "", "pathname");
 	cmd.add(filename);
 
-	TCLAP::ValueArg<std::string> classifierFile("", "classifier", "Path to the classifier", true, "", "pathname");
+   TCLAP::ValueArg<std::string> video("", "video", "Video to categorize", false, "", "pathname");
+   cmd.add(video);
+
+	TCLAP::ValueArg<std::string> classifierFile("", "classifier_name", "Path to the classifier", true, "", "pathname");
 	cmd.add(classifierFile);
 
-	TCLAP::ValueArg<std::string> dictionaryFile("", "dict", "Path to the dictionary", true, "", "pathname");
+	TCLAP::ValueArg<std::string> dictionaryFile("", "dict_name", "Path to the dictionary", true, "", "pathname");
 	cmd.add(dictionaryFile);
 
    TCLAP::ValueArg<std::string> config("", "config_file", "Path to the config file", true, "", "pathname");
@@ -27,6 +30,9 @@ int main(int argc, char **argv){
 
    TCLAP::ValueArg<std::string> descriptor("", "descriptor", "Descriptor to use", false, "SIFT", "string");
    cmd.add(descriptor);
+
+   TCLAP::ValueArg<std::string> classifierToUse("", "classifier", "Classifier to use", false, "KNN", "string");
+   cmd.add(classifierToUse);
 
 	TCLAP::ValueArg<int> neighbours("", "neighbours", "Number of neighbours for KNN. Default 1", false, 1, "int");
 	cmd.add(neighbours);
@@ -45,54 +51,40 @@ int main(int argc, char **argv){
    cv::Ptr<cv::ml::KNearest> dict = cv::Algorithm::read<cv::ml::KNearest>(dictFile.root());
    dictFile.release();
 
-   cv::Ptr<cv::ml::KNearest> knnClassifier = cv::Algorithm::load<cv::ml::KNearest>(classifierFile.getValue());
-   knnClassifier->setDefaultK(neighbours.getValue());
-
-   cv::Mat image;
-   if(descriptor.getValue()!="PHOW"){
-      image = cv::imread(filename.getValue(), cv::IMREAD_GRAYSCALE);
+   cv::Ptr<cv::ml::StatModel> classifier;
+   if(classifierToUse.getValue()=="KNN"){
+      cv::Ptr<cv::ml::KNearest> knnClassifier = cv::Algorithm::load<cv::ml::KNearest>(classifierFile.getValue());
+      knnClassifier->setDefaultK(neighbours.getValue());
+      classifier = knnClassifier;
    }
    else{
-      image = cv::imread(filename.getValue());
-      cv::cvtColor(image, image, cv::COLOR_BGR2HSV);
+      if(classifierToUse.getValue()=="SVM"){
+         cv::Ptr<cv::ml::SVM> svm = cv::Algorithm::load<cv::ml::SVM>(classifierFile.getValue());
+         classifier = svm;
+      }
    }
-   if(image.rows==0){
-      std::cout << "La imagen no existe" << std::endl;
-      exit(-1);
-   }
+
+
+   cv::Mat image=readImage(filename.getValue(), descriptorToUse.getValue()=="PHOW");
    resize(image, image, cv::Size(IMG_WIDTH, round(IMG_WIDTH*image.rows / image.cols)));
 
-   cv::Mat descriptorsMat;
-   if(descriptor.getValue()=="SIFT"){
-      descriptorsMat=extractSIFTDescriptors(image);
-   }
-   else if(descriptor.getValue()=="SURF"){
-      descriptorsMat=extractSURFDescriptors(image);
-   }
-   else if(descriptor.getValue()=="DSIFT"){
-      descriptorsMat=extractDenseSIFTDescriptors(image, siftScales);
-   }
-   else if(descriptor.getValue()=="PHOW"){
-      descriptorsMat=extractPHOWDescriptors(image, siftScales);
-   }
-   else{
-      std::cout << "Ese tipo de descriptor no está disponible" << std::endl;
-      exit(-1);
-   }
-
+   cv::Mat descriptorsMat=getDescriptors(image, siftScales);
    cv::Mat bovw = compute_bovw(dict, keywords, descriptorsMat);
-
-   cv::Ptr<cv::ml::StatModel> classifier;
-   classifier = knnClassifier;
 
    cv::Mat predicted_labels;
    classifier->predict(bovw, predicted_labels);
-   cv::namedWindow(categories[predicted_labels.at<float>(0,0)]);
 
-   if(descriptor.getValue()=="PHOW"){
-      cv::cvtColor(image, image, cv::COLOR_HSV2BGR);
+   if(image.getValue()!=""){
+      cv::namedWindow(categories[predicted_labels.at<float>(0,0)]);
+
+      if(descriptor.getValue()=="PHOW"){
+         cv::cvtColor(image, image, cv::COLOR_HSV2BGR);
+      }
+
+      cv::imshow(categories[predicted_labels.at<float>(0,0)], image);
+      cv::waitKey(0);
    }
-
-   cv::imshow(categories[predicted_labels.at<float>(0,0)], image);
-   cv::waitKey(0);
+   else{
+      std::cout << "In the video there is/are " << categories[predicted_labels.at<float>(0,0)] << std::endl;
+   }
 }

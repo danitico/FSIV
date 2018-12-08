@@ -258,7 +258,43 @@ cv::Mat extractPHOWDescriptors(const cv::Mat & img, const std::vector<int> siftS
    }
    return descriptors;
 }
+cv::Mat getDescriptors(const cv::Mat & img, const std::vector<int> siftScales){
+   cv::Mat descriptorsMat;
+   if(descriptor.getValue()=="SIFT"){
+      descriptorsMat=extractSIFTDescriptors(image);
+   }
+   else if(descriptor.getValue()=="SURF"){
+      descriptorsMat=extractSURFDescriptors(image);
+   }
+   else if(descriptor.getValue()=="DSIFT"){
+      descriptorsMat=extractDenseSIFTDescriptors(image, siftScales);
+   }
+   else if(descriptor.getValue()=="PHOW"){
+      descriptorsMat=extractPHOWDescriptors(image, siftScales);
+   }
+   else{
+      std::cout << "Ese tipo de descriptor no está disponible" << std::endl;
+      exit(-1);
+   }
 
+   return descriptorsMat;
+}
+cv::Mat readImage(std::string image_name, bool phow){
+   cv::Mat image;
+   if(!phow){
+      image = cv::imread(image_name, cv::IMREAD_GRAYSCALE);
+   }
+   else{
+      image = cv::imread(image_name);
+      cv::cvtColor(image, image, cv::COLOR_BGR2HSV);
+   }
+   if(image.rows==0){
+      std::cout << "La imagen no existe" << std::endl;
+      exit(-1);
+   }
+
+   return image;
+}
 
 cv::Mat compute_bovw (const cv::Ptr<cv::ml::KNearest>& dict, const int dict_size, cv::Mat& img_descs, bool normalize){
    cv::Mat bovw = cv::Mat::zeros(1, dict_size, CV_32F);

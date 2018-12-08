@@ -17,7 +17,7 @@ int
 main(int argc, char ** argv){
 	TCLAP::CmdLine cmd("Train and test a BoVW model", ' ', "0.0");
 
-	TCLAP::ValueArg<std::string> basenameArg("", "basename", "basename for the dataset.", false, "../src/data", "pathname");
+	TCLAP::ValueArg<std::string> basenameArg("", "basename", "basename for the dataset.", false, "../data", "pathname");
 	cmd.add(basenameArg);
 
 	TCLAP::ValueArg<std::string> configFile("", "config_file", "configuration file for the dataset.", false, "02_ObjectCategories_conf.txt", "pathname");
@@ -44,11 +44,14 @@ main(int argc, char ** argv){
 	TCLAP::ValueArg<int> neighbours("", "neighbours", "Number of neighbours for KNN. Default 1", false, 1, "int");
 	cmd.add(neighbours);
 
-	TCLAP::ValueArg<std::string> kernel("", "kernel", "Type of kernel for SVM. Default LINEAR", false, "LINEAR", "string");
+	TCLAP::ValueArg<std::string> kernel("", "kernel", "[SVM] Type of kernel for SVM. Default LINEAR", false, "LINEAR", "string");
 	cmd.add(kernel);
 
-	TCLAP::ValueArg<double> margin("", "margin", "Margin parameter for SVM. Default 0", false, 0, "int");
+	TCLAP::ValueArg<int> margin("", "margin", "[SVM] Margin parameter for SVM. Default 1", false, 1, "int");
 	cmd.add(margin);
+
+	TCLAP::ValueArg<int> degree("", "degree", "[SVM POLINOMIAL KERNEL] Margin parameter for SVM. Default 1", false, 1, "int");
+	cmd.add(degree);
 
 	TCLAP::ValueArg<std::string> descriptorToUse("", "descriptor", "Type of descriptor. Default SIFT", false, "SIFT", "string");
 	cmd.add(descriptorToUse);
@@ -193,7 +196,7 @@ main(int argc, char ** argv){
 		std::clog << "\t\tGenerating the a bovw descriptor per train image." << std::endl;
 		int row_start = 0;
 		cv::Mat train_bovw;
-		std::vector<float> train_labels_v;
+		std::vector<int> train_labels_v;
 		train_labels_v.resize(0);
 
 		for(size_t c = 0, i = 0; c < train_samples.size(); ++c){
@@ -233,16 +236,19 @@ main(int argc, char ** argv){
 				if(kernel.getValue()=="LINEAR"){
 					svm->setKernel(cv::ml::SVM::LINEAR);
 				}
-				else if(kernel.getValue()="RADIAL"){
+				else if(kernel.getValue()=="RADIAL"){
 					svm->setKernel(cv::ml::SVM::RBF);
 				}
 				else if(kernel.getValue()=="POLINOMIAL"){
 					svm->setKernel(cv::ml::SVM::POLY);
+					svm->setDegree(degree.getValue());
 				}
 				else{
 					svm->setKernel(cv::ml::SVM::LINEAR);
 				}
-				svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 100, 1e-6));
+				svm->setC(margin.getValue());
+				svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 100, 1e-6));
+				classifier = svm;
 			}
 			else{
 				cv::Ptr<cv::ml::KNearest> knnClassifier = cv::ml::KNearest::create();
