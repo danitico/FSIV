@@ -9,6 +9,7 @@
 #include <string>
 #include <opencv2/core.hpp>
 #include <opencv2/ml.hpp>
+#include <opencv2/highgui.hpp>
 
 void basename(const std::string& path,
                      std::string& dirname,
@@ -67,7 +68,7 @@ cv::Mat extractSIFTDescriptors(const cv::Mat& img, const int ndesc=0);
 cv::Mat extractDenseSIFTDescriptors(const cv::Mat & img, const std::vector<int> siftScales);
 cv::Mat extractSURFDescriptors(const cv::Mat & img);
 cv::Mat extractPHOWDescriptors(const cv::Mat & img, const std::vector<int> siftScales);
-cv::Mat getDescriptors(const cv::Mat & img, const std::vector<int> siftScales);
+cv::Mat getDescriptors(const cv::Mat & img, std::string descriptor, const std::vector<int> siftScales);
 cv::Mat readImage(std::string image_name, bool phow);
 
 /**

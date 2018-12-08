@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <tclap/CmdLine.h>
 #include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/ml/ml.hpp>
 #include "common_code.hpp"
@@ -18,6 +17,9 @@ int main(int argc, char **argv){
 
    TCLAP::ValueArg<std::string> video("", "video", "Video to categorize", false, "", "pathname");
    cmd.add(video);
+
+   TCLAP::ValueArg<bool> webcam("", "webcam", "Video to categorize", false, "", "bool");
+   cmd.add(webcam);
 
 	TCLAP::ValueArg<std::string> classifierFile("", "classifier_name", "Path to the classifier", true, "", "pathname");
 	cmd.add(classifierFile);
@@ -64,17 +66,16 @@ int main(int argc, char **argv){
       }
    }
 
+   if(filename.getValue()!=""){
+      cv::Mat image=readImage(filename.getValue(), descriptor.getValue()=="PHOW");
+      resize(image, image, cv::Size(IMG_WIDTH, round(IMG_WIDTH*image.rows / image.cols)));
 
-   cv::Mat image=readImage(filename.getValue(), descriptorToUse.getValue()=="PHOW");
-   resize(image, image, cv::Size(IMG_WIDTH, round(IMG_WIDTH*image.rows / image.cols)));
+      cv::Mat descriptorsMat=getDescriptors(image, descriptor.getValue(), siftScales);
+      cv::Mat bovw = compute_bovw(dict, keywords, descriptorsMat);
 
-   cv::Mat descriptorsMat=getDescriptors(image, siftScales);
-   cv::Mat bovw = compute_bovw(dict, keywords, descriptorsMat);
+      cv::Mat predicted_labels;
+      classifier->predict(bovw, predicted_labels);
 
-   cv::Mat predicted_labels;
-   classifier->predict(bovw, predicted_labels);
-
-   if(image.getValue()!=""){
       cv::namedWindow(categories[predicted_labels.at<float>(0,0)]);
 
       if(descriptor.getValue()=="PHOW"){
@@ -84,7 +85,50 @@ int main(int argc, char **argv){
       cv::imshow(categories[predicted_labels.at<float>(0,0)], image);
       cv::waitKey(0);
    }
+   else if(video.getValue()!=""){
+      // cv::namedWindow("Input");
+      cv::VideoCapture input;
+      if(webcam.getValue()){
+         input.open(stoi(video.getValue()));
+      }
+      else{
+         input.open(video.getValue());
+      }
+
+      cv::Mat inFrame;
+      bool wasOk = input.read(inFrame);
+      int key = 0;
+
+      std::string pruebaxd="";
+      cv::Mat inFrame1;
+      while(wasOk && key!=27){
+         // cv::imshow ("Input", inFrame);
+         inFrame1=inFrame.clone();
+         resize(inFrame1, inFrame1, cv::Size(IMG_WIDTH, round(IMG_WIDTH*inFrame1.rows / inFrame1.cols)));
+
+         if(descriptor.getValue()=="PHOW"){
+            cv::cvtColor(inFrame1, inFrame1, cv::COLOR_BGR2HSV);
+         }
+
+         cv::Mat descriptorsMat=getDescriptors(inFrame1, descriptor.getValue(), siftScales);
+         cv::Mat bovw = compute_bovw(dict, keywords, descriptorsMat);
+
+         cv::Mat predicted_labels;
+         classifier->predict(bovw, predicted_labels);
+
+         if(pruebaxd!=categories[predicted_labels.at<float>(0,0)]){
+            std::cout << "In the video there is/are " << categories[predicted_labels.at<float>(0,0)] << std::endl;
+            pruebaxd=categories[predicted_labels.at<float>(0,0)];
+         }
+
+         wasOk=input.read(inFrame);
+         key = cv::waitKey(20);
+      }
+
+      std::cout << std::endl;
+   }
    else{
-      std::cout << "In the video there is/are " << categories[predicted_labels.at<float>(0,0)] << std::endl;
+      std::cout << "ERROR" << std::endl;
+      exit(-1);
    }
 }

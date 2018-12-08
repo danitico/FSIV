@@ -258,19 +258,19 @@ cv::Mat extractPHOWDescriptors(const cv::Mat & img, const std::vector<int> siftS
    }
    return descriptors;
 }
-cv::Mat getDescriptors(const cv::Mat & img, const std::vector<int> siftScales){
+cv::Mat getDescriptors(const cv::Mat & img, std::string descriptor, const std::vector<int> siftScales){
    cv::Mat descriptorsMat;
-   if(descriptor.getValue()=="SIFT"){
-      descriptorsMat=extractSIFTDescriptors(image);
+   if(descriptor=="SIFT"){
+      descriptorsMat=extractSIFTDescriptors(img);
    }
-   else if(descriptor.getValue()=="SURF"){
-      descriptorsMat=extractSURFDescriptors(image);
+   else if(descriptor=="SURF"){
+      descriptorsMat=extractSURFDescriptors(img);
    }
-   else if(descriptor.getValue()=="DSIFT"){
-      descriptorsMat=extractDenseSIFTDescriptors(image, siftScales);
+   else if(descriptor=="DSIFT"){
+      descriptorsMat=extractDenseSIFTDescriptors(img, siftScales);
    }
-   else if(descriptor.getValue()=="PHOW"){
-      descriptorsMat=extractPHOWDescriptors(image, siftScales);
+   else if(descriptor=="PHOW"){
+      descriptorsMat=extractPHOWDescriptors(img, siftScales);
    }
    else{
       std::cout << "Ese tipo de descriptor no está disponible" << std::endl;
