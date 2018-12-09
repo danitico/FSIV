@@ -53,6 +53,15 @@ main(int argc, char ** argv){
 	TCLAP::ValueArg<int> degree("", "degree", "[SVM POLINOMIAL KERNEL] Margin parameter for SVM. Default 1", false, 1, "int");
 	cmd.add(degree);
 
+	TCLAP::ValueArg<int> depth("", "depth", "[RANDOM FOREST CLASSIFIER] Depth of the tree. Default 10", false, 10, "int");
+	cmd.add(depth);
+
+	TCLAP::ValueArg<int> min_samples("", "min_samples", "[RANDOM FOREST CLASSIFIER] Minimun samples in a node. Default 5", false, 5, "int");
+	cmd.add(min_samples);
+
+	TCLAP::ValueArg<int> number_of_trees("", "number_trees", "[RANDOM FOREST CLASSIFIER] Minimun samples in a node. Default 100", false, 100, "int");
+	cmd.add(number_of_trees);
+
 	TCLAP::ValueArg<std::string> descriptorToUse("", "descriptor", "Type of descriptor. Default SIFT", false, "SIFT", "string");
 	cmd.add(descriptorToUse);
 
@@ -251,11 +260,21 @@ main(int argc, char ** argv){
 				classifier = svm;
 			}
 			else{
-				cv::Ptr<cv::ml::KNearest> knnClassifier = cv::ml::KNearest::create();
-				knnClassifier->setAlgorithmType(cv::ml::KNearest::BRUTE_FORCE);
-				knnClassifier->setDefaultK(neighbours.getValue());
-				knnClassifier->setIsClassifier(true);
-				classifier = knnClassifier;
+				if(classifierToUse.getValue()=="RF"){
+					cv::Ptr<cv::ml::RTrees> randomForest = cv::ml::RTrees::create();
+					randomForest->setMaxDepth(depth.getValue());
+					randomForest->setMinSampleCount(min_samples.getValue());
+					randomForest->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, number_of_trees.getValue(), 1e-6));
+					// randomForest->setActiveVarCount(10);
+					classifier = randomForest;
+				}
+				else{
+					cv::Ptr<cv::ml::KNearest> knnClassifier = cv::ml::KNearest::create();
+					knnClassifier->setAlgorithmType(cv::ml::KNearest::BRUTE_FORCE);
+					knnClassifier->setDefaultK(neighbours.getValue());
+					knnClassifier->setIsClassifier(true);
+					classifier = knnClassifier;
+				}
 			}
 		}
 

@@ -86,7 +86,7 @@ int main(int argc, char **argv){
       cv::waitKey(0);
    }
    else if(video.getValue()!=""){
-      // cv::namedWindow("Input");
+      cv::namedWindow("Input");
       cv::VideoCapture input;
       if(webcam.getValue()){
          input.open(stoi(video.getValue()));
@@ -102,7 +102,7 @@ int main(int argc, char **argv){
       std::string pruebaxd="";
       cv::Mat inFrame1;
       while(wasOk && key!=27){
-         // cv::imshow ("Input", inFrame);
+         cv::imshow ("Input", inFrame);
          inFrame1=inFrame.clone();
          resize(inFrame1, inFrame1, cv::Size(IMG_WIDTH, round(IMG_WIDTH*inFrame1.rows / inFrame1.cols)));
 
