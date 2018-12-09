@@ -64,6 +64,12 @@ int main(int argc, char **argv){
          cv::Ptr<cv::ml::SVM> svm = cv::Algorithm::load<cv::ml::SVM>(classifierFile.getValue());
          classifier = svm;
       }
+      else{
+         if(classifierToUse.getValue()=="RF"){
+            cv::Ptr<cv::ml::RTrees> randomForest = cv::Algorithm::load<cv::ml::RTrees>(classifierFile.getValue());
+            classifier = randomForest;
+         }
+      }
    }
 
    if(filename.getValue()!=""){
