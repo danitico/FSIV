@@ -265,15 +265,21 @@ main(int argc, char ** argv){
 					randomForest->setMaxDepth(depth.getValue());
 					randomForest->setMinSampleCount(min_samples.getValue());
 					randomForest->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, number_of_trees.getValue(), 1e-6));
-					// randomForest->setActiveVarCount(10);
 					classifier = randomForest;
 				}
 				else{
-					cv::Ptr<cv::ml::KNearest> knnClassifier = cv::ml::KNearest::create();
-					knnClassifier->setAlgorithmType(cv::ml::KNearest::BRUTE_FORCE);
-					knnClassifier->setDefaultK(neighbours.getValue());
-					knnClassifier->setIsClassifier(true);
-					classifier = knnClassifier;
+					if(classifierToUse.getValue()=="BOOST"){
+						cv::Ptr<cv::ml::Boost> boosting = cv::ml::Boost::create();
+						boosting->setBoostType(cv::ml::Boost::DISCRETE);
+						classifier = boosting;
+					}
+					else{
+						cv::Ptr<cv::ml::KNearest> knnClassifier = cv::ml::KNearest::create();
+						knnClassifier->setAlgorithmType(cv::ml::KNearest::BRUTE_FORCE);
+						knnClassifier->setDefaultK(neighbours.getValue());
+						knnClassifier->setIsClassifier(true);
+						classifier = knnClassifier;
+					}
 				}
 			}
 		}

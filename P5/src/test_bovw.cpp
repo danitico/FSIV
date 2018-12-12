@@ -69,6 +69,12 @@ int main(int argc, char **argv){
             cv::Ptr<cv::ml::RTrees> randomForest = cv::Algorithm::load<cv::ml::RTrees>(classifierFile.getValue());
             classifier = randomForest;
          }
+         else{
+            if(classifierToUse.getValue()=="BOOST"){
+               cv::Ptr<cv::ml::Boost> boosting = cv::Algorithm::load<cv::ml::Boost>(classifierFile.getValue());
+               classifier = boosting;
+            }
+         }
       }
    }
 
@@ -105,7 +111,7 @@ int main(int argc, char **argv){
       bool wasOk = input.read(inFrame);
       int key = 0;
 
-      std::string pruebaxd="";
+      std::string dummie="";
       cv::Mat inFrame1;
       while(wasOk && key!=27){
          cv::imshow ("Input", inFrame);
@@ -122,9 +128,9 @@ int main(int argc, char **argv){
          cv::Mat predicted_labels;
          classifier->predict(bovw, predicted_labels);
 
-         if(pruebaxd!=categories[predicted_labels.at<float>(0,0)]){
+         if(dummie!=categories[predicted_labels.at<float>(0,0)]){
             std::cout << "In the video there is/are " << categories[predicted_labels.at<float>(0,0)] << std::endl;
-            pruebaxd=categories[predicted_labels.at<float>(0,0)];
+            dummie=categories[predicted_labels.at<float>(0,0)];
          }
 
          wasOk=input.read(inFrame);
