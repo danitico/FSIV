@@ -18,7 +18,7 @@ int main(int argc, char **argv){
    TCLAP::ValueArg<std::string> video("", "video", "Video to categorize", false, "", "pathname");
    cmd.add(video);
 
-   TCLAP::ValueArg<bool> webcam("", "webcam", "Video to categorize", false, "", "bool");
+   TCLAP::ValueArg<bool> webcam("", "webcam", "Video to categorize", false, false, "bool");
    cmd.add(webcam);
 
 	TCLAP::ValueArg<std::string> classifierFile("", "classifier_name", "Path to the classifier", true, "", "pathname");

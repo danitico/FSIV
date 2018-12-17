@@ -62,6 +62,9 @@ main(int argc, char ** argv){
 	TCLAP::ValueArg<int> number_of_trees("", "number_trees", "[RANDOM FOREST CLASSIFIER] Minimun samples in a node. Default 100", false, 100, "int");
 	cmd.add(number_of_trees);
 
+	TCLAP::ValueArg<int> weak_classifiers("", "weak_classifiers", "[BOOSTING] Number of weak classifiers. Default 100", false, 100, "int");
+	cmd.add(weak_classifiers);
+
 	TCLAP::ValueArg<std::string> descriptorToUse("", "descriptor", "Type of descriptor. Default SIFT", false, "SIFT", "string");
 	cmd.add(descriptorToUse);
 
@@ -245,8 +248,8 @@ main(int argc, char ** argv){
 				if(kernel.getValue()=="LINEAR"){
 					svm->setKernel(cv::ml::SVM::LINEAR);
 				}
-				else if(kernel.getValue()=="RADIAL"){
-					svm->setKernel(cv::ml::SVM::RBF);
+				else if(kernel.getValue()=="CHI2"){
+					svm->setKernel(cv::ml::SVM::CHI2);
 				}
 				else if(kernel.getValue()=="POLINOMIAL"){
 					svm->setKernel(cv::ml::SVM::POLY);
@@ -271,6 +274,7 @@ main(int argc, char ** argv){
 					if(classifierToUse.getValue()=="BOOST"){
 						cv::Ptr<cv::ml::Boost> boosting = cv::ml::Boost::create();
 						boosting->setBoostType(cv::ml::Boost::DISCRETE);
+						boosting->setWeakCount(weak_classifiers.getValue());
 						classifier = boosting;
 					}
 					else{
